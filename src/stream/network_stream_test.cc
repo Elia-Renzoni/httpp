@@ -57,9 +57,14 @@ TEST(NetworkStreamTest, TCPServerReceivesMessage) {
     std::string expected_message = "Hello World";
 
     TestableNetworkStream server(test_address, test_port);
-    server.setupTCP();
-    server.bindTCP();
-    server.listenTCP();
+    try {
+        server.setupTCP();
+        server.bindTCP();
+        server.listenTCP();
+    } catch (const NetworkError& e) {
+        std::cerr << "server error: " << e.what() << std::endl;
+        FAIL();
+    }
 
     std::string received_message;
 
@@ -72,7 +77,7 @@ TEST(NetworkStreamTest, TCPServerReceivesMessage) {
                 delete[] buffer; // Free the dynamically allocated buffer
             }
         } catch (const NetworkError& e) {
-            std::cerr << "Server thread error: " << e.what() << std::endl;
+            std::cerr << "server thread error: " << e.what() << std::endl;
         }
     });
 
