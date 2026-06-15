@@ -2,6 +2,7 @@
 #include <string>
 #include <netinet/in.h>
 #include <stdexcept>
+#include <utility>
 
 #pragma once
 
@@ -19,7 +20,7 @@ class NetworkStream {
         void setupTCP();
         void listenTCP();
         void bindTCP();
-        char* acceptTCP();
+        std::pair<char*,ssize_t> acceptTCP();
         void closeTCP();
     private:
         std::string listenerAddress;

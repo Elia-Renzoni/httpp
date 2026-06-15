@@ -1,6 +1,5 @@
 
 #include <sys/socket.h>
-#include <fcntl.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
@@ -16,8 +15,6 @@ void NetworkStream::setupTCP() {
     socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
     auto opt = 1;
     setsockopt(socketFileDescriptor, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-    auto flags = fcntl(socketFileDescriptor, F_GETFL, 0);
-    fcntl(socketFileDescriptor, F_SETFL, flags | O_NONBLOCK);
 }
 
 void NetworkStream::bindTCP() {
@@ -43,7 +40,7 @@ void NetworkStream::listenTCP() {
     }
 }
 
-char* NetworkStream::acceptTCP() {
+std::pair<char*, ssize_t> NetworkStream::acceptTCP() {
     struct sockaddr_in client;
     socklen_t len = sizeof(client);
     auto sock = accept(socketFileDescriptor, (struct sockaddr *)&client, &len);
@@ -57,7 +54,12 @@ char* NetworkStream::acceptTCP() {
          closeTCP();
          throw NetworkError("failed to read data");
     }
-    return recvBuffer;
+
+    if (recvLen < 5048) 
+        recvBuffer[recvLen] = '\0';
+    else
+        recvBuffer[5047] = '\0';
+    return {recvBuffer, recvLen};
 }
 
 }

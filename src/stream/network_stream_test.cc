@@ -71,9 +71,11 @@ TEST(NetworkStreamTest, TCPServerReceivesMessage) {
     // Run acceptTCP in a separate thread
     std::thread server_thread([&]() {
         try {
-            char* buffer = server.acceptTCP();
+            std::pair<char*, ssize_t> connPair = server.acceptTCP();
+            char* buffer = connPair.first;
+            ssize_t len = connPair.second;
             if (buffer) {
-                received_message = std::string(buffer);
+                received_message = std::string(buffer, len);
                 delete[] buffer; // Free the dynamically allocated buffer
             }
         } catch (const NetworkError& e) {
