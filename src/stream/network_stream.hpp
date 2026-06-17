@@ -20,7 +20,7 @@ class NetworkStream {
         void setupTCP();
         void listenTCP();
         void bindTCP();
-        std::pair<char*,ssize_t> acceptTCP();
+        std::pair<char*,std::pair<ssize_t, int>> acceptTCP();
         void closeTCP();
     private:
         std::string listenerAddress;
