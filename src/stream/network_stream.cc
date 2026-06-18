@@ -40,7 +40,7 @@ void NetworkStream::listenTCP() {
     }
 }
 
-std::pair<char*, ssize_t> NetworkStream::acceptTCP() {
+std::pair<char*, std::pair<ssize_t, int>> NetworkStream::acceptTCP() {
     struct sockaddr_in client;
     socklen_t len = sizeof(client);
     auto sock = accept(socketFileDescriptor, (struct sockaddr *)&client, &len);
@@ -59,7 +59,7 @@ std::pair<char*, ssize_t> NetworkStream::acceptTCP() {
         recvBuffer[recvLen] = '\0';
     else
         recvBuffer[5047] = '\0';
-    return {recvBuffer, recvLen};
+    return {recvBuffer, {recvLen, socketFileDescriptor}};
 }
 
 }
