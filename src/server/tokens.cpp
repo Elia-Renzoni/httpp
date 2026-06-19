@@ -1,5 +1,4 @@
 
-#include <algorithm>
 #include "tokens.hpp"
 
 namespace server  {

@@ -35,8 +35,16 @@ class Scanner {
         };
 
         bool isWhiteSpace(char ch) {
-            return (ch == ' ') || (ch == '\t') || (ch == '\r') || (ch == '\n');
+            return (ch == ' ') || (ch == '\t');
         };
+
+        bool isCR(char ch) {
+            return ch == '\r';
+        }
+        
+        bool isLF(char ch) {
+            return ch == '\n';
+        }
 
         std::string_view buffer;
         size_t currOffset;

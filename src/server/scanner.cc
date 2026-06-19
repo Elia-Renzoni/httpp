@@ -12,6 +12,16 @@ std::pair<tokens, std::string> Scanner::scanDigit() {
         if (ch == BUF_EOF)
             break;
 
+        if (isCR(ch)) {
+            continue;
+        }
+
+        if (isLF(ch)) 
+            return {INTEGER, buffer};
+
+        // skip white space
+        if (isWhiteSpace(ch)) continue;
+
         if (!isNumber(ch))
             break;
 
@@ -54,6 +64,10 @@ std::pair<tokens, std::string> Scanner::scan() {
         if (ch == BUF_EOF) 
             break;
 
+        if (isCR(ch)) continue;
+
+        if (isLF(ch)) break;;
+
         if (isLetter(ch)) {
             buffer.push_back(ch);
             continue;
@@ -63,11 +77,15 @@ std::pair<tokens, std::string> Scanner::scan() {
             buffer.push_back(ch);
             continue;
         }
-
         
+        // ignore white space
         if (isWhiteSpace(ch)) {
-            break;
+            continue;
         }
+
+        if (ch == '=') break;
+        if (ch == ';') break;
+        if (ch == ',') break;
 
         switch (ch) {
             case '-':
@@ -77,20 +95,22 @@ std::pair<tokens, std::string> Scanner::scan() {
             case '/':
             case '?':
             case '&':
-            case '=':
             case '%':
-            case ':':
             case '+':
             case '@':
             case '#':
-            case ';':
             case ',':
             case '$':
             case '<':
             case '>':
+            case ':':
             case '`':
                 buffer.push_back(ch);
                 break;
+            case '[':
+                return {LPAR, "["};
+            case ']':
+                return {RPAR, buffer};
             default:
                 return {UNKNOWN, buffer};
         }

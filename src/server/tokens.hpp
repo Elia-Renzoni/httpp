@@ -75,7 +75,10 @@ enum tokens {
     INTEGER = 56,
     STRING = 57,
     DATETIME = 58,
-    UNKNOWN = 59
+    UNKNOWN = 59,
+
+    LPAR,
+    RPAR
 };
 
 class TokensManager {
@@ -148,7 +151,9 @@ class TokensManager {
                 {SP, " "},
                 {CR, "\r"},
                 {LF, "\n"},
-                {CRLF, "\r\n"}
+                {CRLF, "\r\n"},
+                {LPAR, "["},
+                {RPAR, "]"},
             };
         };
 

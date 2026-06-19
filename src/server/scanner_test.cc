@@ -79,7 +79,7 @@ TEST(ScannerTest, TestScanStringsMixed) {
 }
 
 TEST(ScannerTest, TestGeneralScan) {
-    std::string buffer = "ab%<>=b";
+    std::string buffer = "ab%<>";
     char* buf = buffer.data();
 
     server::TokensManager tm = server::TokensManager();
@@ -87,7 +87,7 @@ TEST(ScannerTest, TestGeneralScan) {
 
     std::pair<tokens, std::string> scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
-    ASSERT_EQ(scanResult.second, "ab%<>=b");
+    ASSERT_EQ(scanResult.second, "ab%<>");
 }
 
 TEST(ScannerTest, TestScanRandomString) {
@@ -160,4 +160,104 @@ TEST(ScannerTest, TestScanHTTPVersion3) {
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, HTTP_3);
     ASSERT_EQ(scanResult.second, "HTTP/3");
+}
+
+TEST(ScannerTest, TestScanComplexExpressions) {
+    std::string buffer = "text/html; charset=UTF-8";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "text/html");
+
+    scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "charset");
+
+    scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "UTF-8");
+}
+
+TEST(ScannerTest, TestScanHeaderKVPair) {
+    std::string buffer = "Content-Type: multipart/form-data; boundary=something";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, CONTENT_TYPE);
+    ASSERT_EQ(scanResult.second, "Content-Type");
+
+    scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "multipart/form-data");
+
+    scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "boundary");
+
+    scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "something");
+}
+
+TEST(ScannerTest, TestScanHeaderKVPair2) {
+    std::string buffer = "Content-Length: 348";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, CONTENT_LENGTH);
+    ASSERT_EQ(scanResult.second, "Content-Length");
+
+    scanResult = s.scanDigit();
+    ASSERT_EQ(scanResult.first, INTEGER);
+    ASSERT_EQ(scanResult.second, "348");
+}
+
+TEST(ScannerTest, TestScanCRLF) {
+    std::string buffer = "Content-Length: 348\r\n";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, CONTENT_LENGTH);
+    ASSERT_EQ(scanResult.second, "Content-Length");
+
+    scanResult = s.scanDigit();
+    ASSERT_EQ(scanResult.first, INTEGER);
+    ASSERT_EQ(scanResult.second, "348");
+}
+
+TEST(ScannerTest, TestScanCRLF2) {
+    std::string buffer = "Content-Type: application/json; charset=utf-8\r\n";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, CONTENT_TYPE);
+    ASSERT_EQ(scanResult.second, "Content-Type");
+
+    scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "application/json");
+
+    scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "charset");
+
+    scanResult = s.scan();
+    ASSERT_EQ(scanResult.first, STRING);
+    ASSERT_EQ(scanResult.second, "utf-8");
 }
