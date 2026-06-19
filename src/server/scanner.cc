@@ -14,6 +14,7 @@ std::pair<tokens, std::string> Scanner::scanDigit() {
         }
 
         unread();
+        break;
     }
 
     if (buffer.empty())
@@ -32,6 +33,7 @@ std::pair<tokens, std::string> Scanner::scanString() {
         }
 
         unread();
+        break;
     }
 
     if (buffer.empty())
