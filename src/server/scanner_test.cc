@@ -90,7 +90,7 @@ TEST(ScannerTest, TestGeneralScan) {
     ASSERT_EQ(scanResult.second, "ab%<>=b");
 }
 
-TEST(ScannerTest, TestScanUserAgent) {
+TEST(ScannerTest, TestScanRandomString) {
     std::string buffer = "U12-";
     char* buf = buffer.data();
 
@@ -98,6 +98,66 @@ TEST(ScannerTest, TestScanUserAgent) {
     server::Scanner s = server::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scan();
-    ASSERT_EQ(scanResult.first, USER_AGENT);
+    ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "U12-");
+}
+
+TEST(ScannerTest, TestScanHeaderKey) {
+    std::string buffer = "User-Agent:";
+    char* buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, USER_AGENT);
+    ASSERT_EQ(scanResult.second, "User-Agent");
+}
+
+TEST(ScannerTest, TestScanHeaderKeyWithErrors) {
+    std::string buffer = "User-Agent : ";
+    char* buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, UNKNOWN);
+    ASSERT_EQ(scanResult.second, "User-Agent");
+}
+
+TEST(ScannerTest, TestScanHTTPVersion2) {
+    std::string buffer = "HTTP/2";
+    char* buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, HTTP_2);
+    ASSERT_EQ(scanResult.second, "HTTP/2");
+}
+
+TEST(ScannerTest, TestScanHTTPVersion11) {
+    std::string buffer = "HTTP/1.1";
+    char* buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, HTTP_1_1);
+    ASSERT_EQ(scanResult.second, "HTTP/1.1");
+}
+
+TEST(ScannerTest, TestScanHTTPVersion3) {
+    std::string buffer = "HTTP/3";
+    char* buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> scanResult = s.scanKey();
+    ASSERT_EQ(scanResult.first, HTTP_3);
+    ASSERT_EQ(scanResult.second, "HTTP/3");
 }

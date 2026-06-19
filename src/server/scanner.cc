@@ -111,17 +111,22 @@ void Scanner::unscan(ssize_t positions) {
 std::pair<tokens, std::string> Scanner::scanKey() {
     std::string buffer;
 
-    // Accept-Language: france\r\n
     for (;;) {
         char ch = readNext();
 
         if (ch == BUF_EOF) break;
 
-        if (isWhiteSpace(ch)) break;
+        if (isWhiteSpace(ch)) {
+            return {UNKNOWN, buffer};
+        }
 
-        if (!isLetter(ch) && ch != '-') {
-            if (ch != ':') {
-                return {UNKNOWN, buffer};
+        if (!isLetter(ch)) {
+            if (!(ch == '-' || ch == '.' || ch == '/') && !isNumber(ch)) {
+                if (ch != ':') {
+                    return {UNKNOWN, buffer};
+                } else {
+                    break;
+                }
             }
         }
 
