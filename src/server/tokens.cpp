@@ -16,15 +16,12 @@ std::optional<std::string> TokensManager::getLiteralFromToken(tokens& token) {
 };
 
 std::optional<tokens> TokensManager::getTokenFromLiteral(std::string& literal) {
-    tokens t;
-    std::for_each(tokenMap_.begin(), tokenMap_.end(), [&t, literal](const auto& entry) {
-            const auto& [tokenID, tokenLiteral] = entry;
-
-            if (tokenLiteral == literal) {
-                t = tokenID;
-            }
-    });
-    return t;
+    for (const auto& [tokenID, tokenLiteral] : tokenMap_) {
+        if (tokenLiteral == literal) {
+            return tokenID;
+        }
+    }
+    return std::nullopt;
 };
  
 };

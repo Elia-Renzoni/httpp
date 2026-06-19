@@ -6,42 +6,76 @@
 namespace server {
 
 enum tokens {
-    OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT, PATCH,
+    // HTTP methods
+    OPTIONS = 0,
+    GET = 1,
+    HEAD = 2,
+    POST = 3,
+    PUT = 4,
+    DELETE = 5,
+    TRACE = 6,
+    CONNECT = 7,
+    PATCH = 8,
 
-    HTTP_1, HTTP_1_1, HTTP_2, HTTP_3,
+    // HTTP versions
+    HTTP_1 = 9,
+    HTTP_1_1 = 10,
+    HTTP_2 = 11,
+    HTTP_3 = 12,
 
-    // TODO-> missing URI-related tokens
+    // Headers
+    CACHE_CONTROL = 13,
+    CONNECTION = 14,
+    DATE = 15,
+    PRAGMA = 16,
+    TRAILER = 17,
+    TRANSFER_ENCODING = 18,
+    UPGRADE = 19,
+    VIA = 20,
+    WARNING = 21,
 
-    CACHE_CONTROL,
-    CONNECTION,
-    DATE,
-    PRAGMA,
-    TRAILER,
-    TRANSFER_ENCODING,
-    UPGRADE,
-    VIA,
-    WARNING,
+    ACCEPT = 22,
+    ACCEPT_CHARSET = 23,
+    ACCEPT_ENCODING = 24,
+    ACCEPT_LANGUAGE = 25,
+    AUTHORIZATION = 26,
+    EXCEPT = 27,
+    FROM = 28,
+    HOST = 29,
+    IF_MATCH = 30,
+    IF_MODIFIED_SINCE = 31,
+    IF_NONE_MATCH = 32,
+    IF_RANGE = 33,
+    IF_UNMODIFIED_SINCE = 34,
+    MAX_FORWARDS = 35,
+    PROXY_AUTHORIZATION = 36,
+    RANGE = 37,
+    REFERER = 38,
+    TE = 39,
+    USER_AGENT = 40,
 
-    ACCEPT, ACCEPT_CHARSET, ACCEPT_ENCODING, ACCEPT_LANGUAGE, 
-    AUTHORIZATION, EXCEPT, FROM, HOST, IF_MATCH, IF_MODIFIED_SINCE,
-    IF_NONE_MATCH, IF_RANGE, IF_UNMODIFIED_SINCE, MAX_FORWARDS,
-    PROXY_AUTHORIZATION, RANGE, REFERER, TE, USER_AGENT,
+    ALLOW = 41,
+    CONTENT_ENCODING = 42,
+    CONTENT_LANGUAGE = 43,
+    CONTENT_LENGTH = 44,
+    CONTENT_LOCATION = 45,
+    CONTENT_MD5 = 46,
+    CONTENT_RANGE = 47,
+    CONTENT_TYPE = 48,
+    EXPIRES = 49,
+    LAST_MODIFIED = 50,
+    EXSTENSION_HEADER = 51,
 
+    // control chars / special
+    SP = 52,
+    CR = 53,
+    LF = 54,
+    CRLF = 55,
 
-    ALLOW, CONTENT_ENCODING, CONTENT_LANGUAGE, CONTENT_LENGTH, 
-    CONTENT_LOCATION, CONTENT_MD5, CONTENT_RANGE, CONTENT_TYPE,
-    EXPIRES, LAST_MODIFIED, EXSTENSION_HEADER,
-
-    SP,
-    CR,
-    LF,
-    CRLF,
-
-
-    INTEGER,
-    STRING,
-    DATETIME,
-    UNKNOWN
+    INTEGER = 56,
+    STRING = 57,
+    DATETIME = 58,
+    UNKNOWN = 59
 };
 
 class TokensManager {
@@ -118,7 +152,7 @@ class TokensManager {
             };
         };
 
-        std::unordered_map<int, std::string> tokenMap_;
+        std::unordered_map<tokens, std::string> tokenMap_;
 };
 
 }

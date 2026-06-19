@@ -8,17 +8,19 @@ std::pair<tokens, std::string> Scanner::scanDigit() {
 
     for (;;) {
         char ch = readNext();
-        if (isNumber(ch)) {
-            buffer.push_back(ch);
-            continue;
-        }
 
-        unread();
-        break;
+        if (ch == BUF_EOF)
+            break;
+
+        if (!isNumber(ch))
+            break;
+
+        buffer.push_back(ch);
     }
 
-    if (buffer.empty())
+    if (buffer.empty()) {
         return {UNKNOWN, buffer};
+    }
 
     return {INTEGER, buffer};
 }
@@ -28,12 +30,14 @@ std::pair<tokens, std::string> Scanner::scanString() {
 
     for (;;) {
         char ch = readNext();
-        if (isLetter(ch)) {
-            buffer.push_back(ch);
-        }
 
-        unread();
-        break;
+        if (ch == BUF_EOF) 
+            break;
+
+        if (!isLetter(ch))
+            break;
+
+        buffer.push_back(ch);
     }
 
     if (buffer.empty())
@@ -46,6 +50,10 @@ std::pair<tokens, std::string> Scanner::scan() {
 
     for (;;) {
         char ch = readNext();
+
+        if (ch == BUF_EOF) 
+            break;
+
         if (isLetter(ch)) {
             buffer.push_back(ch);
             continue;
@@ -56,8 +64,9 @@ std::pair<tokens, std::string> Scanner::scan() {
             continue;
         }
 
+        
         if (isWhiteSpace(ch)) {
-            continue;
+            break;
         }
 
         switch (ch) {
@@ -81,6 +90,7 @@ std::pair<tokens, std::string> Scanner::scan() {
             case '>':
             case '`':
                 buffer.push_back(ch);
+                break;
             default:
                 return {UNKNOWN, buffer};
         }
@@ -88,17 +98,41 @@ std::pair<tokens, std::string> Scanner::scan() {
 
 
     auto token = tokManager.getTokenFromLiteral(buffer);
-    if (token.has_value())
+    if (token.has_value()) {
         return {token.value(), buffer};
-    return {UNKNOWN, buffer};
-}
-
-std::pair<tokens, std::string> Scanner::scanDateTime() {
-    return {};
+    }
+    return {STRING, buffer};
 }
 
 void Scanner::unscan(ssize_t positions) {
    currOffset -= positions;
 };
+
+std::pair<tokens, std::string> Scanner::scanKey() {
+    std::string buffer;
+
+    // Accept-Language: france\r\n
+    for (;;) {
+        char ch = readNext();
+
+        if (ch == BUF_EOF) break;
+
+        if (isWhiteSpace(ch)) break;
+
+        if (!isLetter(ch) && ch != '-') {
+            if (ch != ':') {
+                return {UNKNOWN, buffer};
+            }
+        }
+
+        buffer.push_back(ch);
+    }
+
+    auto tok = tokManager.getTokenFromLiteral(buffer);
+    if (tok.has_value()) {
+        return {tok.value(), buffer};
+    }
+    return {UNKNOWN, buffer};
+}
 
 }
