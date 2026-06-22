@@ -262,16 +262,34 @@ TEST(ScannerTest, TestScanCRLF2) {
     ASSERT_EQ(scanResult.second, "utf-8");
 }
 
-TEST(ScannerTest, TestScanComplexHeader) {
-    std::string buffer = "Host: api.example.com\r\n User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/137.0.0.0 Safari/537.36\r\nAccept: application/json, text/plain, */*\r\nAccept-Language: it-IT,it;q=0.9,en;q=0.8\r\nAccept-Encoding: gzip, deflate, br\r\nConnection: keep-alive\r\nCache-Control: no-cache\r\nContent-Type: application/json\r\nOrigin: https://app.example.com\r\nReferer: https://app.example.com/dashboard\r\nCookie: sessionid=abc123def456\r\n";
+TEST(ScannerTest, TestScanCompleteHeader) {
+    std::string buffer = "User-Agent: Mozilla/5.0\r\nAccept: text/html\r\nConnection: keep-alive\r\n";
     char *buf = buffer.data();
 
     server::TokensManager tm = server::TokensManager();
     server::Scanner s = server::Scanner(tm, buf, buffer.size());
 
-    std::pair<tokens, std::string> result;
-    do {
-        result = s.scanKey();
-    } while(result.first != BUF_EOF);
+    std::vector<std::pair<tokens, std::string>> exp = {
+        {USER_AGENT, "User-Agent"},
+        {STRING, "Mozilla/5.0"},
+        {ACCEPT, "Accept"},
+        {STRING, "text/html"},
+        {CONNECTION, "Connection"},
+        {STRING, "keep-alive"},
+    };
 
+    std::pair<tokens, std::string> result;
+    bool swapTime = false;
+    for (auto &expPair: exp) {
+        if (!swapTime) {
+            result = s.scanKey();
+            swapTime = true;
+        } else {
+            result = s.scan();
+            swapTime = false;
+        }
+
+        ASSERT_EQ(expPair.first, result.first);
+        ASSERT_EQ(expPair.second, result.second);
+    }
 }
