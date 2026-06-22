@@ -261,3 +261,17 @@ TEST(ScannerTest, TestScanCRLF2) {
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "utf-8");
 }
+
+TEST(ScannerTest, TestScanComplexHeader) {
+    std::string buffer = "Host: api.example.com\r\n User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/137.0.0.0 Safari/537.36\r\nAccept: application/json, text/plain, */*\r\nAccept-Language: it-IT,it;q=0.9,en;q=0.8\r\nAccept-Encoding: gzip, deflate, br\r\nConnection: keep-alive\r\nCache-Control: no-cache\r\nContent-Type: application/json\r\nOrigin: https://app.example.com\r\nReferer: https://app.example.com/dashboard\r\nCookie: sessionid=abc123def456\r\n";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::pair<tokens, std::string> result;
+    do {
+        result = s.scanKey();
+    } while(result.first != BUF_EOF);
+
+}
