@@ -5,25 +5,30 @@ namespace server {
 
 std::pair<tokens, std::string> Scanner::scanDigit() {
     std::string buffer;
+    bool crSymbol = false;
 
     for (;;) {
         char ch = readNext();
 
-        if (ch == BUF_EOF)
-            break;
-
         if (isCR(ch)) {
+            if (crSymbol) {
+                buffer.clear();
+                break;
+            }
+            crSymbol = true;
             continue;
-        }
-
-        if (isLF(ch)) 
-            return {INTEGER, buffer};
-
-        // skip white space
-        if (isWhiteSpace(ch)) continue;
-
-        if (!isNumber(ch))
+        } else if (isLF(ch)) {
+            if (crSymbol) {
+                break;
+            } else {
+                buffer.clear();
+                break;
+            }
+        } else if (isWhiteSpace(ch)) {
+            continue;
+        } else if (ch == BUF_EOF || !isNumber(ch)) {
             break;
+        }
 
         buffer.push_back(ch);
     }
@@ -37,15 +42,29 @@ std::pair<tokens, std::string> Scanner::scanDigit() {
 
 std::pair<tokens, std::string> Scanner::scanString() {
     std::string buffer;
+    bool crSymbol = false;
 
     for (;;) {
         char ch = readNext();
 
-        if (ch == BUF_EOF) 
+        if (isCR(ch)) {
+            if (crSymbol) {
+                buffer.clear();
+                break;
+            }
+            crSymbol = true;
+        } else if (isLF(ch)) {
+            if (crSymbol) {
+                break;
+            } else {
+                buffer.clear();
+                break;
+            }
+        } else if (isWhiteSpace(ch)) {
+            continue;
+        } else if (ch == BUF_EOF || !isLetter(ch)) {
             break;
-
-        if (!isLetter(ch))
-            break;
+        }
 
         buffer.push_back(ch);
     }
@@ -57,35 +76,36 @@ std::pair<tokens, std::string> Scanner::scanString() {
 
 std::pair<tokens, std::string> Scanner::scan() {
     std::string buffer;
+    bool crSymbol = false;
 
     for (;;) {
         char ch = readNext();
 
-        if (ch == BUF_EOF) 
+        if (isCR(ch)) {
+            if (crSymbol) {
+                buffer.clear();
+                break;
+            }
+
+            crSymbol = true;
+            continue;
+        } else if (isLF(ch)) {
+            if (crSymbol) {
+                break;
+            } else {
+                buffer.clear();
+                break;
+            }
+        } else if (ch == BUF_EOF) {
             break;
-
-        if (isCR(ch)) continue;
-
-        if (isLF(ch)) break;;
-
-        if (isLetter(ch)) {
+        } else if (isLetter(ch) || isNumber(ch)) {
             buffer.push_back(ch);
             continue;
-        }
-
-        if (isNumber(ch)) {
-            buffer.push_back(ch);
+        } else if (isWhiteSpace(ch)) {
             continue;
+        } else if (ch == '=' || ch == ';' || ch == ',') {
+            break;
         }
-        
-        // ignore white space
-        if (isWhiteSpace(ch)) {
-            continue;
-        }
-
-        if (ch == '=') break;
-        if (ch == ';') break;
-        if (ch == ',') break;
 
         switch (ch) {
             case '-':
