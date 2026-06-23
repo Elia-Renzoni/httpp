@@ -261,3 +261,35 @@ TEST(ScannerTest, TestScanCRLF2) {
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "utf-8");
 }
+
+TEST(ScannerTest, TestScanCompleteHeader) {
+    std::string buffer = "User-Agent: Mozilla/5.0\r\nAccept: text/html\r\nConnection: keep-alive\r\n";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::vector<std::pair<tokens, std::string>> exp = {
+        {USER_AGENT, "User-Agent"},
+        {STRING, "Mozilla/5.0"},
+        {ACCEPT, "Accept"},
+        {STRING, "text/html"},
+        {CONNECTION, "Connection"},
+        {STRING, "keep-alive"},
+    };
+
+    std::pair<tokens, std::string> result;
+    bool swapTime = false;
+    for (auto &expPair: exp) {
+        if (!swapTime) {
+            result = s.scanKey();
+            swapTime = true;
+        } else {
+            result = s.scan();
+            swapTime = false;
+        }
+
+        ASSERT_EQ(expPair.first, result.first);
+        ASSERT_EQ(expPair.second, result.second);
+    }
+}
