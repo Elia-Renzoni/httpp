@@ -295,5 +295,6 @@ TEST(ScannerTest, TestScanCompleteHeader) {
 }
 
 TEST(ScannerTest, TestScanURL) {
-    std::string buffer = "";
+    std::string buffer = "https://www.google.com/search?q=formattazione+http";
+    char *buf = buffer.data();
 }

@@ -77,6 +77,7 @@ std::pair<tokens, std::string> Scanner::scanString() {
 std::pair<tokens, std::string> Scanner::scan() {
     std::string buffer;
     bool crSymbol = false;
+    bool slashSymbol = false;
 
     for (;;) {
         char ch = readNext();
@@ -124,6 +125,14 @@ std::pair<tokens, std::string> Scanner::scan() {
             case '<':
             case '>':
             case '`':
+                if (ch == '/' && !slashSymbol) {
+                    slashSymbol = true;
+                    continue;
+                } 
+
+                if (ch == '/' && slashSymbol)
+                    break;
+
                 buffer.push_back(ch);
                 break;
             case '[':
