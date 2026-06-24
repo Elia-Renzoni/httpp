@@ -103,7 +103,7 @@ std::pair<tokens, std::string> Scanner::scan() {
             continue;
         } else if (isWhiteSpace(ch)) {
             continue;
-        } else if (ch == '=' || ch == ';' || ch == ',') {
+        } else if (ch == '=' || ch == ';' || ch == ',' || ch == ':') {
             break;
         }
 
@@ -123,7 +123,6 @@ std::pair<tokens, std::string> Scanner::scan() {
             case '$':
             case '<':
             case '>':
-            case ':':
             case '`':
                 buffer.push_back(ch);
                 break;

@@ -293,3 +293,7 @@ TEST(ScannerTest, TestScanCompleteHeader) {
         ASSERT_EQ(expPair.second, result.second);
     }
 }
+
+TEST(ScannerTest, TestScanURL) {
+    std::string buffer = "";
+}

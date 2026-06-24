@@ -77,8 +77,11 @@ enum tokens {
     DATETIME = 58,
     UNKNOWN = 59,
 
-    LPAR,
-    RPAR
+    LPAR = 60,
+    RPAR = 61, 
+    URL_SCHEMA = 62,
+    URL_HOST = 63,
+    URL_ENDPOINT = 64,
 };
 
 class TokensManager {
