@@ -187,7 +187,7 @@ std::pair<tokens, std::string> Scanner::scanURL() {
     int slashes = 0;
     tokens matchedToken = UNKNOWN;
 
-    // http://www.google.com/search?id=10
+    // http://www.google.com/search
     for (;;) {
         char ch = readNext();
 
@@ -196,7 +196,12 @@ std::pair<tokens, std::string> Scanner::scanURL() {
             break;
         }
 
-        if (isWhiteSpace(ch) || isEqual(ch, ':')) break;
+        if (isWhiteSpace(ch)) break;
+
+        if (isEqual(ch, ':') && !isNumber(readNext())) {
+            unread();
+            break;
+        }
 
         if (isEqual(ch, '/') && slashes < 2) {
             slashes += 1;
