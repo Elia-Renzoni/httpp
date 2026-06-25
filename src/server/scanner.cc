@@ -181,6 +181,35 @@ std::pair<tokens, std::string> Scanner::scanKey() {
 }
 
 std::pair<tokens, std::string> Scanner::scanURL() {
+    std::string buffer;
+    bool crSymbol = false;
+    int slashes = 0;
+
+    for (;;) {
+        char ch = readNext();
+
+        if (ch == BUF_EOF) break;
+
+        if (ch == ':') break;
+
+        // http://www.google.com?
+        // http://www.google.com/blabla?
+        if (ch == '/' && !slashes) {
+            slashes += 1;
+        }
+
+        if (ch == '?') {
+        }
+
+        if (isLetter(ch) || isNumber(ch)) {
+            buffer.push_back(ch);
+        }
+    }
+
+    auto token = tokManager.getTokenFromLiteral(buffer);
+    if (token.has_value()) 
+        return {token.value(), buffer};
+
     return {};
 }
 
