@@ -293,3 +293,45 @@ TEST(ScannerTest, TestScanCompleteHeader) {
         ASSERT_EQ(expPair.second, result.second);
     }
 }
+
+TEST(ScannerTest, TestScanURL) {
+    std::string buffer = "https://www.google.com/search?id=10";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::vector<std::pair<tokens, std::string>> expResult = {
+        {URL_SCHEMAS, "https"},
+        {URL_HOST, "www.google.com"},
+        {URL_ENDPOINT, "search"},
+        {URL_QUERY, "id"},
+        {STRING, "10"},
+    };
+
+    for (auto &exp : expResult) {
+        auto got = s.scanURL();
+        ASSERT_EQ(got.second, exp.second);
+        ASSERT_EQ(got.first, exp.first);
+    }
+}
+
+TEST(ScannerTest, TestScanURL2) {
+    std::string buffer = "http://192.90.90.2:4040/deleteall";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::vector<std::pair<tokens, std::string>> expResults = {
+        {URL_SCHEMA, "http"},
+        {URL_HOST, "192.90.90.2:4040"},
+        {URL_ENDPOINT, "deleteall"},
+    };
+
+    for (auto &exp : expResults) {
+        auto got = s.scanURL();
+        ASSERT_EQ(got.second, exp.second);
+        ASSERT_EQ(got.first, got.first);
+    }
+}

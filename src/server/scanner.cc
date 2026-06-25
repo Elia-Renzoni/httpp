@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include "scanner.hpp"
 
 namespace server {
@@ -178,6 +179,60 @@ std::pair<tokens, std::string> Scanner::scanKey() {
         return {tok.value(), buffer};
     }
     return {UNKNOWN, buffer};
+}
+
+std::pair<tokens, std::string> Scanner::scanURL() {
+    std::string buffer;
+    bool crSymbol = false;
+    int slashes = 0;
+    tokens matchedToken = UNKNOWN;
+
+    // http://www.google.com/search
+    for (;;) {
+        char ch = readNext();
+
+        if (isEqual(ch, BUF_EOF)) {
+            matchedToken = STRING;
+            break;
+        }
+
+        if (isWhiteSpace(ch)) break;
+
+        if (isEqual(ch, ':') && !isNumber(readNext())) {
+            unread();
+            break;
+        }
+
+        if (isEqual(ch, '/') && slashes < 2) {
+            slashes += 1;
+            matchedToken = URL_HOST;
+            continue;
+        }
+
+        if ((isEqual(ch, '?') || isEqual(ch, '/')) && slashes >= 2) {
+            break;
+        } else if (isEqual(ch, '?')) {
+            matchedToken = URL_ENDPOINT;
+            break;
+        } else if (isEqual(ch, '=')) {
+            matchedToken = URL_QUERY;
+            break;
+        } else if (isEqual(ch, '&')) {
+            // FIXME: what about STRING vs INTEGER?
+            matchedToken = STRING;
+            break;
+        }
+
+        if (isLetter(ch) || isNumber(ch) || isLegitSymbol(ch)) {
+            buffer.push_back(ch);
+        }
+    }
+
+    auto token = tokManager.getTokenFromLiteral(buffer);
+    if (token.has_value()) 
+        return {token.value(), buffer};
+
+    return {matchedToken, buffer};
 }
 
 }

@@ -77,8 +77,15 @@ enum tokens {
     DATETIME = 58,
     UNKNOWN = 59,
 
-    LPAR,
-    RPAR
+    LPAR = 60,
+    RPAR = 61, 
+
+    URL_SCHEMA = 62,
+    URL_SCHEMAS = 63,
+    URL_HOST = 64,
+    URL_ENDPOINT = 65,
+    URL_QUERY = 66,
+    URL_FRAGMENT = 67,
 };
 
 class TokensManager {
@@ -154,6 +161,8 @@ class TokensManager {
                 {CRLF, "\r\n"},
                 {LPAR, "["},
                 {RPAR, "]"},
+                {URL_SCHEMA, "http"},
+                {URL_SCHEMAS, "https"}
             };
         };
 
