@@ -31,6 +31,14 @@ class Scanner {
             return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
         }; 
 
+        bool isEqual(char in, char sentinel) {
+            return in == sentinel;
+        }
+
+        bool isNotEqual(char in, char sentinel) {
+            return !(in == sentinel);
+        }
+
         bool isNumber(char ch) {
             return ch >= '0' && ch <= '9';
         };
@@ -45,6 +53,33 @@ class Scanner {
         
         bool isLF(char ch) {
             return ch == '\n';
+        }
+
+        bool isLegitSymbol(char inputSymbol) {
+            switch (inputSymbol) {
+                case '-':
+                case '.':
+                case '_':
+                case '~':
+                case '/':
+                case '?':
+                case '&':
+                case '%':
+                case '+':
+                case '@':
+                case '#':
+                case ',':
+                case '$':
+                case '<':
+                case '>':
+                case ':':
+                case '`':
+                case '[':
+                case ']':
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         std::string_view buffer;

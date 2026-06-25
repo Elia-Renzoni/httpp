@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include "scanner.hpp"
 
 namespace server {
@@ -184,24 +185,40 @@ std::pair<tokens, std::string> Scanner::scanURL() {
     std::string buffer;
     bool crSymbol = false;
     int slashes = 0;
+    tokens matchedToken = UNKNOWN;
 
     for (;;) {
         char ch = readNext();
+        std::cout << "reading: " << ch << "\n";
 
-        if (ch == BUF_EOF) break;
+        if (isEqual(ch, BUF_EOF)) break;
 
-        if (ch == ':') break;
+        if (isEqual(ch, ':') && !isNumber(readNext())) {
+            unread();
+            break;
+        }
 
-        // http://www.google.com?
-        // http://www.google.com/blabla?
-        if (ch == '/' && !slashes) {
+        if (isEqual(ch, '/') && slashes < 2) {
             slashes += 1;
+            continue;
         }
 
-        if (ch == '?') {
+        if ((isEqual(ch, '?') || isEqual(ch, '/')) && slashes >= 2) {
+            matchedToken = URL_HOST;
+            break;
+        } else if (isEqual(ch, '?') && slashes == 1) {
+            matchedToken = URL_ENDPOINT;
+            break;
+        } else if (isEqual(ch, '=')) {
+            matchedToken = URL_QUERY;
+            break;
+        } else if (isEqual(ch, '&')) {
+            // FIXME: what about STRING vs INTEGER?
+            matchedToken = STRING;
+            break;
         }
 
-        if (isLetter(ch) || isNumber(ch)) {
+        if (isLetter(ch) || isNumber(ch) || isLegitSymbol(ch)) {
             buffer.push_back(ch);
         }
     }
@@ -210,7 +227,7 @@ std::pair<tokens, std::string> Scanner::scanURL() {
     if (token.has_value()) 
         return {token.value(), buffer};
 
-    return {};
+    return {matchedToken, buffer};
 }
 
 }

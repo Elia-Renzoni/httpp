@@ -295,6 +295,23 @@ TEST(ScannerTest, TestScanCompleteHeader) {
 }
 
 TEST(ScannerTest, TestScanURL) {
-    std::string buffer = "https://www.google.com/search?q=formattazione+http";
+    std::string buffer = "https://www.google.com/search?id=10";
     char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::vector<std::pair<tokens, std::string>> expResult = {
+        {URL_SCHEMAS, "https"},
+        {URL_HOST, "www.google.com"},
+        {URL_ENDPOINT, "search"},
+        {URL_QUERY, "id"},
+        {STRING, "10"},
+    };
+
+    for (auto &exp : expResult) {
+        auto got = s.scanURL();
+        ASSERT_EQ(got.second, exp.second);
+        ASSERT_EQ(got.first, exp.first);
+    }
 }
