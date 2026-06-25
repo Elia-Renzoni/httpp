@@ -15,6 +15,7 @@ class Scanner {
         std::pair<tokens, std::string> scan();
         std::pair<tokens, std::string> scanString();
         std::pair<tokens, std::string> scanKey();
+        std::pair<tokens, std::string> scanURL();
         void unscan(ssize_t positions);
     private:
         char readNext() {

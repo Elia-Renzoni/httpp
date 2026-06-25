@@ -77,7 +77,6 @@ std::pair<tokens, std::string> Scanner::scanString() {
 std::pair<tokens, std::string> Scanner::scan() {
     std::string buffer;
     bool crSymbol = false;
-    bool slashSymbol = false;
 
     for (;;) {
         char ch = readNext();
@@ -104,7 +103,7 @@ std::pair<tokens, std::string> Scanner::scan() {
             continue;
         } else if (isWhiteSpace(ch)) {
             continue;
-        } else if (ch == '=' || ch == ';' || ch == ',' || ch == ':') {
+        } else if (ch == '=' || ch == ';' || ch == ',') {
             break;
         }
 
@@ -124,15 +123,8 @@ std::pair<tokens, std::string> Scanner::scan() {
             case '$':
             case '<':
             case '>':
+            case ':':
             case '`':
-                if (ch == '/' && !slashSymbol) {
-                    slashSymbol = true;
-                    continue;
-                } 
-
-                if (ch == '/' && slashSymbol)
-                    break;
-
                 buffer.push_back(ch);
                 break;
             case '[':
@@ -186,6 +178,10 @@ std::pair<tokens, std::string> Scanner::scanKey() {
         return {tok.value(), buffer};
     }
     return {UNKNOWN, buffer};
+}
+
+std::pair<tokens, std::string> Scanner::scanURL() {
+    return {};
 }
 
 }
