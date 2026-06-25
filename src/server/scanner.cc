@@ -187,26 +187,26 @@ std::pair<tokens, std::string> Scanner::scanURL() {
     int slashes = 0;
     tokens matchedToken = UNKNOWN;
 
+    // http://www.google.com/search?id=10
     for (;;) {
         char ch = readNext();
-        std::cout << "reading: " << ch << "\n";
 
-        if (isEqual(ch, BUF_EOF)) break;
-
-        if (isEqual(ch, ':') && !isNumber(readNext())) {
-            unread();
+        if (isEqual(ch, BUF_EOF)) {
+            matchedToken = STRING;
             break;
         }
 
+        if (isWhiteSpace(ch) || isEqual(ch, ':')) break;
+
         if (isEqual(ch, '/') && slashes < 2) {
             slashes += 1;
+            matchedToken = URL_HOST;
             continue;
         }
 
         if ((isEqual(ch, '?') || isEqual(ch, '/')) && slashes >= 2) {
-            matchedToken = URL_HOST;
             break;
-        } else if (isEqual(ch, '?') && slashes == 1) {
+        } else if (isEqual(ch, '?')) {
             matchedToken = URL_ENDPOINT;
             break;
         } else if (isEqual(ch, '=')) {
