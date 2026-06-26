@@ -1,4 +1,5 @@
 
+#include <vector>
 #include <string_view>
 #include "tokens.hpp"
 
@@ -82,10 +83,24 @@ class Scanner {
             }
         }
 
+        tokens fetchLatestState() {
+            tokens tok = URL_SCHEMA;
+            auto len = stateMachine.size();
+
+            if (len) return tok;
+            if (len > 1) return stateMachine.at(len);
+            return tok;
+        }
+
+        void advanceState(tokens newState) {
+            stateMachine.push_back(newState);
+        }
+
         std::string_view buffer;
         size_t currOffset;
         const char BUF_EOF = '\0';
         TokensManager tokManager;
+        std::vector<tokens> stateMachine;
 };
 
 }
