@@ -104,7 +104,7 @@ std::pair<tokens, std::string> Scanner::scan() {
             continue;
         } else if (isWhiteSpace(ch)) {
             continue;
-        } else if (ch == '=' || ch == ';' || ch == ',') {
+        } else if (isEqual(ch, '=') || isEqual(ch, ';') || isEqual(ch, ',')) {
             break;
         }
 
@@ -162,7 +162,7 @@ std::pair<tokens, std::string> Scanner::scanKey() {
         }
 
         if (!isLetter(ch)) {
-            if (!(ch == '-' || ch == '.' || ch == '/') && !isNumber(ch)) {
+            if (!(isEqual(ch, '-') || isEqual(ch, '.') || isEqual(ch, '/')) && !isNumber(ch)) {
                 if (ch != ':') {
                     return {UNKNOWN, buffer};
                 } else {
