@@ -306,7 +306,7 @@ TEST(ScannerTest, TestScanURL) {
         {URL_HOST, "www.google.com"},
         {URL_ENDPOINT, "search"},
         {URL_QUERY, "id"},
-        {STRING, "10"},
+        {URL_STRING, "10"},
     };
 
     for (auto &exp : expResult) {
@@ -333,5 +333,70 @@ TEST(ScannerTest, TestScanURL2) {
         auto got = s.scanURL();
         ASSERT_EQ(got.second, exp.second);
         ASSERT_EQ(got.first, got.first);
+    }
+}
+
+TEST(ScannerTest, TestScanURL3) {
+    std::string buffer = "http://www.foo.edu/bar/foo/bar2";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::vector<std::pair<tokens, std::string>> expResult = {
+        {URL_SCHEMA, "http"},
+        {URL_HOST, "www.foo.edu"},
+        {URL_ENDPOINT, "bar/foo/bar2"},
+    };
+
+    for (auto &exp : expResult) {
+        auto got = s.scanURL();
+        ASSERT_EQ(got.second, exp.second);
+        ASSERT_EQ(got.first, exp.first);
+    }
+}
+
+TEST(ScannerTest, TestScanURL4) {
+    std::string buffer = "https://127.0.0.1:8080/search?id=123&name=foo+bar";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::vector<std::pair<tokens, std::string>> expResult = {
+        {URL_SCHEMAS, "https"},
+        {URL_HOST, "127.0.0.1:8080"},
+        {URL_ENDPOINT, "search"},
+        {URL_QUERY, "id"},
+        {URL_STRING, "123"},
+        {URL_QUERY, "name"},
+        {URL_STRING, "foo bar"},
+    };
+
+    for (auto &exp : expResult) {
+        auto got = s.scanURL();
+        ASSERT_EQ(got.second, exp.second);
+        ASSERT_EQ(got.first, exp.first);
+    }
+}
+
+TEST(ScannerTest, TestScanURL5) {
+    std::string buffer = "http://it.wikipedia.org/wiki/rome#monuments_and_pplaces27";
+    char *buf = buffer.data();
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+
+    std::vector<std::pair<tokens, std::string>> expResult = {
+        {URL_SCHEMA, "http"},
+        {URL_HOST, "it.wikipedia.org"},
+        {URL_ENDPOINT, "wiki/rome"},
+        {URL_FRAGMENT, "monuments_and_pplaces27"},
+    };
+
+    for (auto &exp : expResult) {
+        auto got = s.scanURL();
+        ASSERT_EQ(got.second, exp.second);
+        ASSERT_EQ(got.first, exp.first);
     }
 }
