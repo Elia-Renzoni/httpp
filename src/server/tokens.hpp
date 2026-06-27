@@ -80,6 +80,7 @@ enum tokens {
     LPAR = 60,
     RPAR = 61, 
 
+    // for state machine lexing
     URL_SCHEMA = 62,
     URL_SCHEMAS = 63,
     URL_HOST = 64,
