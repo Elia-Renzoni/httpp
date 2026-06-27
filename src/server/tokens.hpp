@@ -87,6 +87,9 @@ enum tokens {
     URL_ENDPOINT = 65,
     URL_QUERY = 66,
     URL_FRAGMENT = 67,
+    URL_STRING = 68,
+
+
 };
 
 class TokensManager {

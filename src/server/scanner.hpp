@@ -63,13 +63,8 @@ class Scanner {
                 case '_':
                 case '~':
                 case '/':
-                case '?':
-                case '&':
                 case '%':
-                case '+':
                 case '@':
-                case '#':
-                case ',':
                 case '$':
                 case '<':
                 case '>':
@@ -84,12 +79,7 @@ class Scanner {
         }
 
         tokens fetchLatestState() {
-            tokens tok = URL_SCHEMA;
-            auto len = stateMachine.size();
-
-            if (len) return tok;
-            if (len > 1) return stateMachine.at(len);
-            return tok;
+            return stateMachine.back();
         }
 
         void advanceState(tokens newState) {
@@ -100,7 +90,7 @@ class Scanner {
         size_t currOffset;
         const char BUF_EOF = '\0';
         TokensManager tokManager;
-        std::vector<tokens> stateMachine;
+        std::vector<tokens> stateMachine = {URL_SCHEMA};
 };
 
 }

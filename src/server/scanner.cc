@@ -104,7 +104,7 @@ std::pair<tokens, std::string> Scanner::scan() {
             continue;
         } else if (isWhiteSpace(ch)) {
             continue;
-        } else if (ch == '=' || ch == ';' || ch == ',') {
+        } else if (isEqual(ch, '=') || isEqual(ch, ';') || isEqual(ch, ',')) {
             break;
         }
 
@@ -162,7 +162,7 @@ std::pair<tokens, std::string> Scanner::scanKey() {
         }
 
         if (!isLetter(ch)) {
-            if (!(ch == '-' || ch == '.' || ch == '/') && !isNumber(ch)) {
+            if (!(isEqual(ch, '-') || isEqual(ch, '.') || isEqual(ch, '/')) && !isNumber(ch)) {
                 if (ch != ':') {
                     return {UNKNOWN, buffer};
                 } else {
@@ -183,18 +183,19 @@ std::pair<tokens, std::string> Scanner::scanKey() {
 
 std::pair<tokens, std::string> Scanner::scanURL() {
     std::string buffer;
-    int httpSlashes = 0;
-    tokens state;
     tokens tok = UNKNOWN;
 
-    // http://www.google.com/search
     for (;;) {
         char ch = readNext();
 
-        if (isEqual(ch, BUF_EOF) || isWhiteSpace(ch)) break;
+        if (isEqual(ch, BUF_EOF)) {
+            tok = Scanner::fetchLatestState();
+            break;
+        }
 
-        state = Scanner::fetchLatestState();
-        switch (state) {
+        if (isWhiteSpace(ch)) break;
+
+        switch (Scanner::fetchLatestState()) {
             case URL_SCHEMA:
                 if (isLetter(ch)) break;
                 if (isNumber(ch)) return {UNKNOWN, buffer};
@@ -204,31 +205,63 @@ std::pair<tokens, std::string> Scanner::scanURL() {
                 }
             case URL_HOST:
                 if (isEqual(ch, '/')) {
-                    httpSlashes += 1;
-                    continue;
+                    char ch = readNext();
+                    if (isEqual(ch, '/')) {
+                        continue;
+                    } else {
+                        unread();
+                        Scanner::advanceState(URL_ENDPOINT);
+                        return {URL_HOST, buffer};
+                    }
                 }
  
-                if (isLetter(ch) || isLegitSymbol(ch) || isNumber(ch) || isEqual(ch, ':')) break;
-
-                if (httpSlashes > 2) {
-                    Scanner::advanceState(URL_ENDPOINT);
-                    return {URL_HOST, buffer};
-                }
+                if (isLetter(ch) || isLegitSymbol(ch) || isNumber(ch)) break;
 
                 if (isEqual(ch, '?')) {
                     Scanner::advanceState(URL_QUERY);
                     return {URL_HOST, buffer};
                 }
             case URL_ENDPOINT:
-                if (isLetter(ch) || isNumber(ch)) break;
+                if (isLetter(ch) || isNumber(ch) || isEqual(ch, '/')) break;
                 if (isEqual(ch, '?')) {
                     Scanner::advanceState(URL_QUERY);
                     return {URL_ENDPOINT, buffer};
                 }
+
+                if (isEqual(ch, '#')) {
+                    Scanner::advanceState(URL_FRAGMENT);
+                    return {URL_ENDPOINT, buffer};
+                }
             case URL_QUERY:
-                break;
+                if (isLetter(ch) || isNumber(ch) || isLegitSymbol(ch)) break;
+                if (isEqual(ch, '=')) {
+                    Scanner::advanceState(URL_STRING);
+                    return {URL_QUERY, buffer};
+                }
+
+            case URL_STRING:
+                if (isLetter(ch) || isNumber(ch) || isLegitSymbol(ch)) break;
+                if (isEqual(ch, '+')) {
+                    // reconstruct white space
+                    ch = ' ';
+                    break;
+                }
+
+                if (isEqual(ch, '&')) {
+                    Scanner::advanceState(URL_QUERY);
+                    return {URL_STRING, buffer};
+                }
+
+                if (isEqual(ch, '#')) {
+                    Scanner::advanceState(URL_FRAGMENT);
+                    return {URL_STRING, buffer};
+                }
             case URL_FRAGMENT:
-                break;
+                if (isLetter(ch) || isNumber(ch) || isLegitSymbol(ch)) break;
+                else {
+                    return {UNKNOWN, buffer};
+                }
+
             default:
                 break;
         }
@@ -241,7 +274,7 @@ EVAL_TOK:
     if (result.has_value())
         return {result.value(), buffer};
 
-    return {UNKNOWN, buffer};
+    return {tok, buffer};
 }
 
 }
