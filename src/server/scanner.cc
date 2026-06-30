@@ -75,7 +75,7 @@ std::pair<tokens, std::string> Scanner::scanString() {
     return {STRING, buffer};
 };
 
-std::pair<tokens, std::string> Scanner::scan() {
+std::pair<tokens, std::string> Scanner::scan(bool ignoreWhiteSpaces) {
     std::string buffer;
     bool crSymbol = false;
 
@@ -102,7 +102,7 @@ std::pair<tokens, std::string> Scanner::scan() {
         } else if (isLetter(ch) || isNumber(ch)) {
             buffer.push_back(ch);
             continue;
-        } else if (isWhiteSpace(ch)) {
+        } else if (isWhiteSpace(ch) && ignoreWhiteSpaces) {
             continue;
         } else if (isEqual(ch, '=') || isEqual(ch, ';') || isEqual(ch, ',')) {
             break;
@@ -158,7 +158,7 @@ std::pair<tokens, std::string> Scanner::scanKey() {
         if (ch == BUF_EOF) break;
 
         if (isWhiteSpace(ch)) {
-            return {UNKNOWN, buffer};
+            break;
         }
 
         if (!isLetter(ch)) {
@@ -193,7 +193,9 @@ std::pair<tokens, std::string> Scanner::scanURL() {
             break;
         }
 
-        if (isWhiteSpace(ch)) break;
+        if (isWhiteSpace(ch)) {
+            return {URL_WHITESPACE, buffer};
+        }
 
         switch (Scanner::fetchLatestState()) {
             case URL_SCHEMA:

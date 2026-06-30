@@ -86,9 +86,9 @@ enum tokens {
     URL_HOST = 64,
     URL_ENDPOINT = 65,
     URL_QUERY = 66,
-    URL_FRAGMENT = 67,
-    URL_STRING = 68,
-
+    URL_STRING = 67,
+    URL_FRAGMENT = 68,
+    URL_WHITESPACE = 69,
 
 };
 
