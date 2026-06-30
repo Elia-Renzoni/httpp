@@ -37,6 +37,10 @@ void Parser::parseRequestLine() {
     // delete white space state
     parserStack->pop();
 
+    if (!checkURLOrderGoodness(parserStack)) {
+        throw ParserException("invalid URL order");
+    }
+
     result = lex.scanKey();
     if (!isValidProtocol(result.first)) {
         throw ParserException("invalid HTTP protocol type");

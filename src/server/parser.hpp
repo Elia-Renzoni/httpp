@@ -79,10 +79,23 @@ class Parser {
             return false;
         }
 
-        [[maybe_unused]]
         bool checkURLOrderGoodness(const std::unique_ptr<PStack>& pStack) {
             auto stack = pStack->stack;
-            return is_sorted(stack.begin(), stack.end());
+            auto watermark = is_sorted_until(stack.begin(), stack.end());
+            if (watermark != stack.end()) {
+                auto offset = std::distance(stack.begin(), watermark);
+                auto faultyEntry = stack[offset];
+                if (faultyEntry.token == URL_QUERY) {
+                    auto adjEntry = stack[offset+1];
+                    if (adjEntry.token == URL_STRING) {
+                        return true;
+                    }
+                }
+            } else {
+                return true;
+            }
+
+            return false;
         }
 
         bool isValidMethodType(const tokens& methodType) {
