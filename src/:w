@@ -12,14 +12,13 @@ void Parser::parseRequestLine() {
         throw ParserException("invalid HTTP method type");
     }
 
-    auto methodTypePair = SymbolPair{
+    auto protocolPair = SymbolPair{
         .token = result.first,
         .literal = result.second,
     };
 
-    parserStack->push(methodTypePair);
+    parserStack->push(protocolPair);
 
-    lex.resetStateMachineWidth(URL_ENDPOINT);
     SymbolPair urlPair;
     do {
         result = lex.scanURL();
@@ -36,17 +35,17 @@ void Parser::parseRequestLine() {
         throw ParserException("invalid URL token order");
     }
 
-    result = lex.scanKey();
+    result = lex.scan(!IGNORE_WHITE_SPACES);
     if (!isValidMethodType(result.first)) {
-        throw ParserException("invalid HTTP protocol type");
+        throw ParserException("invalid HTTP method type");
     }
 
-    auto protocolPair = SymbolPair{
+    auto methodTypePair = SymbolPair{
         .token = result.first,
         .literal = result.second,
     };
 
-    parserStack->push(protocolPair);
+    parserStack->push(methodTypePair);
 }
 
 void Parser::parseGeneralHeader() {

@@ -279,4 +279,9 @@ EVAL_TOK:
     return {tok, buffer};
 }
 
+void Scanner::resetStateMachineWidth(tokens initState) {
+    stateMachine.clear();
+    stateMachine.push_back(initState);
+};
+
 }

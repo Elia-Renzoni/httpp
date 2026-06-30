@@ -18,6 +18,7 @@ class Scanner {
         std::pair<tokens, std::string> scanKey();
         std::pair<tokens, std::string> scanURL();
         void unscan(ssize_t positions);
+        void resetStateMachineWidth(tokens initState);
     private:
         char readNext() {
             if (currOffset >= buffer.size()) return BUF_EOF;
