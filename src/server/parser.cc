@@ -19,7 +19,11 @@ void Parser::parseRequestLine() {
 
     parserStack->push(methodTypePair);
 
-    lex.resetStateMachineWidth(URL_ENDPOINT);
+    if (result.first != CONNECT)
+        lex.resetStateMachineWidth(URL_ENDPOINT);
+    else
+        lex.resetStateMachineWidth(URL_HOST);
+
     SymbolPair urlPair;
     do {
         result = lex.scanURL();

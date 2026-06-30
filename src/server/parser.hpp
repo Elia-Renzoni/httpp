@@ -52,8 +52,8 @@ struct PStack {
 
 class Parser {
     public:
-        Parser(std::string inputBuffer, Scanner& lexer): 
-            input(inputBuffer), lex(lexer), parserStack(std::make_unique<PStack>()) {};
+        Parser(Scanner& lexer): 
+           lex(lexer), parserStack(std::make_unique<PStack>()) {};
         ~Parser() = default;
 
         void parseRequestLine();
@@ -94,7 +94,6 @@ class Parser {
             return false;
         }
 
-        std::string input;
         Scanner& lex;
         const bool IGNORE_WHITE_SPACES = false;
 };
