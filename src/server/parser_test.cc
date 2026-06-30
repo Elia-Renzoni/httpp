@@ -28,10 +28,10 @@ TEST(TestParser, TestParseRequestLine) {
     };
 
     std::vector<std::vector<std::pair<tokens, std::string>>> outputs = {
-        {{GET, "GET"}, {URL_ENDPOINT, "index.html"}, {HTTP_1_1, "HTTP/1.1"}},
-        {{GET, "GET"}, {URL_ENDPOINT, "api/users"}, {URL_QUERY, "id"}, {URL_STRING, "42"}, {URL_QUERY, "active"}, {URL_STRING, "true"}, {HTTP_1_1, "HTTP/1.1"}},
-        {{DELETE, "DELETE"}, {URL_ENDPOINT, "api/users/42"}, {HTTP_1_1, "HTTP/1.1"}},
-        {{POST, "POST"}, {URL_ENDPOINT, "api/login"}, {HTTP_1_1, "HTTP/1.1"}},
+        {{GET, "GET"}, {URL_ENDPOINT, "/index.html"}, {HTTP_1_1, "HTTP/1.1"}},
+        {{GET, "GET"}, {URL_ENDPOINT, "/api/users"}, {URL_QUERY, "id"}, {URL_STRING, "42"}, {URL_QUERY, "active"}, {URL_STRING, "true"}, {HTTP_1_1, "HTTP/1.1"}},
+        {{DELETE, "DELETE"}, {URL_ENDPOINT, "/api/users/42"}, {HTTP_1_1, "HTTP/1.1"}},
+        {{POST, "POST"}, {URL_ENDPOINT, "/api/login"}, {HTTP_1_1, "HTTP/1.1"}},
         {{CONNECT, "CONNECT"}, {URL_HOST, "proxy.example.com:443"}, {HTTP_1_1, "HTTP/1.1"}},
     };
 
@@ -46,6 +46,9 @@ TEST(TestParser, TestParseRequestLine) {
             p.parseRequestLine();
         } catch (ParserException& exp) {
             std::cout << exp.what();
+            for (const auto& entry : p.parserStack->stack) {
+                std::cout << "token: " << entry.token << " literal: " << entry.literal << "\n";
+            }
             FAIL();
         }
 
@@ -54,4 +57,7 @@ TEST(TestParser, TestParseRequestLine) {
         assertMulti(gotSymbolList, outputTestLine);
     }
 }
+
+
+// g++ -std=c++17 parser_test.cc parser.cc scanner.cc tokens.cpp -o parser_test -lgtest -lgtest_main -pthread
 

@@ -79,8 +79,8 @@ class Parser {
             return false;
         }
 
+        [[maybe_unused]]
         bool checkURLOrderGoodness(const std::unique_ptr<PStack>& pStack) {
-
             auto stack = pStack->stack;
             return is_sorted(stack.begin(), stack.end());
         }

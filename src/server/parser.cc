@@ -8,7 +8,7 @@ void Parser::parseRequestLine() {
 
     result = lex.scanKey();
 
-    if (!isValidProtocol(result.first)) {
+    if (!isValidMethodType(result.first)) {
         throw ParserException("invalid HTTP method type");
     }
 
@@ -34,14 +34,11 @@ void Parser::parseRequestLine() {
 
         parserStack->push(urlPair);
     } while (isValidURL(result.first));
-
-    if (!checkURLOrderGoodness(parserStack)) {
-        parserStack->clearAll();
-        throw ParserException("invalid URL token order");
-    }
+    // delete white space state
+    parserStack->pop();
 
     result = lex.scanKey();
-    if (!isValidMethodType(result.first)) {
+    if (!isValidProtocol(result.first)) {
         throw ParserException("invalid HTTP protocol type");
     }
 

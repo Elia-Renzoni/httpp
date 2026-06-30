@@ -151,11 +151,29 @@ void Scanner::unscan(ssize_t positions) {
 
 std::pair<tokens, std::string> Scanner::scanKey() {
     std::string buffer;
+    bool crSymbol = false;
 
     for (;;) {
         char ch = readNext();
 
-        if (ch == BUF_EOF) break;
+        if (isCR(ch)) {
+            if (crSymbol) {
+                buffer.clear();
+                break;
+            }
+
+            crSymbol = true;
+            continue;
+        } else if (isLF(ch)) {
+            if (crSymbol) {
+                break;
+            } else {
+                buffer.clear();
+                break;
+            }
+        } else if (ch == BUF_EOF) {
+            break;
+        } 
 
         if (isWhiteSpace(ch)) {
             break;
@@ -194,7 +212,13 @@ std::pair<tokens, std::string> Scanner::scanURL() {
         }
 
         if (isWhiteSpace(ch)) {
-            return {URL_WHITESPACE, buffer};
+            if (!buffer.empty()) {
+                unread();
+                tok = Scanner::fetchLatestState();
+                break;
+            }
+
+            return {URL_WHITESPACE, ""};
         }
 
         switch (Scanner::fetchLatestState()) {
