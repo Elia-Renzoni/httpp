@@ -75,7 +75,7 @@ std::pair<tokens, std::string> Scanner::scanString() {
     return {STRING, buffer};
 };
 
-std::pair<tokens, std::string> Scanner::scan() {
+std::pair<tokens, std::string> Scanner::scan(bool ignoreWhiteSpaces) {
     std::string buffer;
     bool crSymbol = false;
 
@@ -102,7 +102,7 @@ std::pair<tokens, std::string> Scanner::scan() {
         } else if (isLetter(ch) || isNumber(ch)) {
             buffer.push_back(ch);
             continue;
-        } else if (isWhiteSpace(ch)) {
+        } else if (isWhiteSpace(ch) && ignoreWhiteSpaces) {
             continue;
         } else if (isEqual(ch, '=') || isEqual(ch, ';') || isEqual(ch, ',')) {
             break;
@@ -151,14 +151,32 @@ void Scanner::unscan(ssize_t positions) {
 
 std::pair<tokens, std::string> Scanner::scanKey() {
     std::string buffer;
+    bool crSymbol = false;
 
     for (;;) {
         char ch = readNext();
 
-        if (ch == BUF_EOF) break;
+        if (isCR(ch)) {
+            if (crSymbol) {
+                buffer.clear();
+                break;
+            }
+
+            crSymbol = true;
+            continue;
+        } else if (isLF(ch)) {
+            if (crSymbol) {
+                break;
+            } else {
+                buffer.clear();
+                break;
+            }
+        } else if (ch == BUF_EOF) {
+            break;
+        } 
 
         if (isWhiteSpace(ch)) {
-            return {UNKNOWN, buffer};
+            break;
         }
 
         if (!isLetter(ch)) {
@@ -193,7 +211,15 @@ std::pair<tokens, std::string> Scanner::scanURL() {
             break;
         }
 
-        if (isWhiteSpace(ch)) break;
+        if (isWhiteSpace(ch)) {
+            if (!buffer.empty()) {
+                unread();
+                tok = Scanner::fetchLatestState();
+                break;
+            }
+
+            return {URL_WHITESPACE, ""};
+        }
 
         switch (Scanner::fetchLatestState()) {
             case URL_SCHEMA:
@@ -276,5 +302,10 @@ EVAL_TOK:
 
     return {tok, buffer};
 }
+
+void Scanner::resetStateMachineWidth(tokens initState) {
+    stateMachine.clear();
+    stateMachine.push_back(initState);
+};
 
 }
