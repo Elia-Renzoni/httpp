@@ -58,6 +58,39 @@ TEST(TestParser, TestParseRequestLine) {
     }
 }
 
+TEST(TestParser, TestCompleteHeader) {
+    std::string inputBuffer = "Content-Type: text/html; charset=UTF-8\r\nContent-Length: 1845\r\nConnection: keep-alive\r\nCache-Control: no-cache, private";
+    char *buf = inputBuffer.data();
+    std::vector<std::pair<tokens, std::string>> expOut = {
+        {CONTENT_TYPE, "Content-Type"},
+        {STRING, "text/html"},
+        {STRING, "charset"},
+        {STRING, "UTF-8"},
+        {CONTENT_LENGTH, "Content-Length"},
+        {STRING, "1845"},
+        {CONNECTION, "Connection"},
+        {STRING, "keep-alive"},
+        {CACHE_CONTROL, "Cache-Control"},
+        {STRING, "no-cache, private"},
+    };
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, inputBuffer.size());
+    server::Parser p = server::Parser(s);
+
+    try {
+        p.parseGenAndEntityHeader();
+    } catch (ParserException& exp) {
+        std::cout << exp.what();
+        for (const auto& entry : p.parserStack->stack) {
+            std::cout << "token: " << entry.token << " literal: " << entry.literal << "\n";
+        }
+        FAIL();
+    }
+
+    auto gotSymbolList = p.parserStack->stack;
+    assertMulti(gotSymbolList, expOut);
+}
 
 // g++ -std=c++17 parser_test.cc parser.cc scanner.cc tokens.cpp -o parser_test -lgtest -lgtest_main -pthread
 
