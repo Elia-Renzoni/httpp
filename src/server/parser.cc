@@ -71,7 +71,7 @@ void Parser::parseGenAndEntityHeader() {
         };
         parserStack->push(sp);
 
-        lexResult = lex.scan(!IGNORE_WHITE_SPACES);
+        lexResult = lex.scan(IGNORE_WHITE_SPACES);
         if (lexResult.first == UNKNOWN) {
             throw ParserException("invalid header value");
         }

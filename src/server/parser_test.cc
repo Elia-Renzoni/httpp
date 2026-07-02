@@ -59,14 +59,19 @@ TEST(TestParser, TestParseRequestLine) {
 }
 
 TEST(TestParser, TestCompleteHeader) {
-    std::string inputBuffer = "Date: Thu, 02 Jul 2026 08:05:00 GMT\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 1845\r\nConnection: keep-alive\r\nCache-Control: no-cache, private\r\n";
+    std::string inputBuffer = "Date: Thu, 02 Jul 2026 08:05:00 GMT\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 1845\r\nConnection: keep-alive\r\nCache-Control: no-cache, private";
     char *buf = inputBuffer.data();
     std::vector<std::pair<tokens, std::string>> expOut = {
-        {DATE, "Thu, 02 Jul 2026 08:05:00 GMT"},
-        {CONTENT_TYPE, "text/html; charset=UTF-8"},
-        {CONTENT_LENGTH, "1845"},
-        {CONNECTION, "keep-alive"},
-        {CACHE_CONTROL, "no-cache, private"},
+        {DATE, "Date"},
+        {STRING, "Thu, 02 Jul 2026 08:05:00 GMT"},
+        {CONTENT_TYPE, "Content-Type"},
+        {STRING, "text/html; charset=UTF-8"},
+        {CONTENT_LENGTH, "Content-Length"},
+        {STRING, "1845"},
+        {CONNECTION, "Connection"},
+        {STRING, "keep-alive"},
+        {CACHE_CONTROL, "Cache-Control"},
+        {STRING, "no-cache, private"},
     };
 
     server::TokensManager tm = server::TokensManager();
@@ -77,6 +82,9 @@ TEST(TestParser, TestCompleteHeader) {
         p.parseGenAndEntityHeader();
     } catch (ParserException& exp) {
         std::cout << exp.what();
+        for (const auto& entry : p.parserStack->stack) {
+            std::cout << "token: " << entry.token << " literal: " << entry.literal << "\n";
+        }
         FAIL();
     }
 
