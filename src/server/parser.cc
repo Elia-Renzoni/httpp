@@ -54,10 +54,34 @@ void Parser::parseRequestLine() {
     parserStack->push(protocolPair);
 }
 
-void Parser::parseGeneralHeader() {
-}
+void Parser::parseGenAndEntityHeader() {
+    std::pair<tokens, std::string> lexResult;
 
-void Parser::parseEntityHeader() {
+    SymbolPair sp;
+    for (;;) {
+        lexResult = lex.scanKey();
+        if (lexResult.first == UNKNOWN) {
+            lex.unscan(lexResult.second.size());
+            throw ParserException("invalid header");
+        }
+
+        sp = SymbolPair{
+            .token = lexResult.first,
+            .literal = lexResult.second,
+        };
+        parserStack->push(sp);
+
+        lexResult = lex.scan(!IGNORE_WHITE_SPACES);
+        if (lexResult.first == UNKNOWN) {
+            throw ParserException("invalid header value");
+        }
+
+        sp = SymbolPair{
+            .token = lexResult.first,
+            .literal = lexResult.second,
+        };
+        parserStack->push(sp);
+    }
 }
 
 }

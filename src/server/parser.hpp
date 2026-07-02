@@ -57,8 +57,7 @@ class Parser {
         ~Parser() = default;
 
         void parseRequestLine();
-        void parseGeneralHeader();
-        void parseEntityHeader();
+        void parseGenAndEntityHeader();
 
         std::unique_ptr<PStack> parserStack;
     private:
@@ -98,6 +97,24 @@ class Parser {
             return false;
         }
 
+        bool isValidHeader(const bool& caller, const tokens& headerTokType) {
+            tokens entityHeadToks[] = {
+                CONTENT_TYPE, CONTENT_LENGTH, CONTENT_ENCODING,
+                CONTENT_LANGUAGE, CONTENT_LOCATION, CONTENT_RANGE,
+                CONTENT_MD5, EXPIRES, LAST_MODIFIED
+            };
+            bool result;
+
+            for (const auto& tok : entityHeadToks) {
+                if (caller == CALLER_IS_ENTITYH && tok == headerTokType)
+                    result = true;
+             
+                if (caller == CALLER_IS_GENERALH && tok == headerTokType)
+                    result = false;
+            }
+            return result;
+        }
+
         bool isValidMethodType(const tokens& methodType) {
             tokens methodTypes[] = {GET, HEAD, POST, PATCH, DELETE, OPTIONS, PUT, TRACE, CONNECT};
 
@@ -109,6 +126,8 @@ class Parser {
 
         Scanner& lex;
         const bool IGNORE_WHITE_SPACES = false;
+        const bool CALLER_IS_ENTITYH = true;
+        const bool CALLER_IS_GENERALH = false;
 };
 
 }

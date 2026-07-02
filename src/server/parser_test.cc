@@ -58,6 +58,31 @@ TEST(TestParser, TestParseRequestLine) {
     }
 }
 
+TEST(TestParser, TestCompleteHeader) {
+    std::string inputBuffer = "Date: Thu, 02 Jul 2026 08:05:00 GMT\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 1845\r\nConnection: keep-alive\r\nCache-Control: no-cache, private\r\n";
+    char *buf = inputBuffer.data();
+    std::vector<std::pair<tokens, std::string>> expOut = {
+        {DATE, "Thu, 02 Jul 2026 08:05:00 GMT"},
+        {CONTENT_TYPE, "text/html; charset=UTF-8"},
+        {CONTENT_LENGTH, "1845"},
+        {CONNECTION, "keep-alive"},
+        {CACHE_CONTROL, "no-cache, private"},
+    };
+
+    server::TokensManager tm = server::TokensManager();
+    server::Scanner s = server::Scanner(tm, buf, inputBuffer.size());
+    server::Parser p = server::Parser(s);
+
+    try {
+        p.parseGenAndEntityHeader();
+    } catch (ParserException& exp) {
+        std::cout << exp.what();
+        FAIL();
+    }
+
+    auto gotSymbolList = p.parserStack->stack;
+    assertMulti(gotSymbolList, expOut);
+}
 
 // g++ -std=c++17 parser_test.cc parser.cc scanner.cc tokens.cpp -o parser_test -lgtest -lgtest_main -pthread
 
