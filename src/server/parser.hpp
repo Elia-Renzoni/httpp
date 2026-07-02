@@ -125,7 +125,6 @@ class Parser {
         }
 
         Scanner& lex;
-        const bool IGNORE_WHITE_SPACES = false;
         const bool CALLER_IS_ENTITYH = true;
         const bool CALLER_IS_GENERALH = false;
 };

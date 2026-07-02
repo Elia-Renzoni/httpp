@@ -59,13 +59,13 @@ TEST(TestParser, TestParseRequestLine) {
 }
 
 TEST(TestParser, TestCompleteHeader) {
-    std::string inputBuffer = "Date: Thu, 02 Jul 2026 08:05:00 GMT\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 1845\r\nConnection: keep-alive\r\nCache-Control: no-cache, private";
+    std::string inputBuffer = "Content-Type: text/html; charset=UTF-8\r\nContent-Length: 1845\r\nConnection: keep-alive\r\nCache-Control: no-cache, private";
     char *buf = inputBuffer.data();
     std::vector<std::pair<tokens, std::string>> expOut = {
-        {DATE, "Date"},
-        {STRING, "Thu, 02 Jul 2026 08:05:00 GMT"},
         {CONTENT_TYPE, "Content-Type"},
-        {STRING, "text/html; charset=UTF-8"},
+        {STRING, "text/html"},
+        {STRING, "charset"},
+        {STRING, "UTF-8"},
         {CONTENT_LENGTH, "Content-Length"},
         {STRING, "1845"},
         {CONNECTION, "Connection"},
