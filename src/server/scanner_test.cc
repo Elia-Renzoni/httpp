@@ -85,7 +85,7 @@ TEST(ScannerTest, TestGeneralScan) {
     server::TokensManager tm = server::TokensManager();
     server::Scanner s = server::Scanner(tm, buf, buffer.size());
 
-    std::pair<tokens, std::string> scanResult = s.scan(false);
+    std::pair<tokens, std::string> scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "ab%<>");
 }
@@ -97,7 +97,7 @@ TEST(ScannerTest, TestScanRandomString) {
     server::TokensManager tm = server::TokensManager();
     server::Scanner s = server::Scanner(tm, buf, buffer.size());
 
-    std::pair<tokens, std::string> scanResult = s.scan(false);
+    std::pair<tokens, std::string> scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "U12-");
 }
@@ -169,15 +169,15 @@ TEST(ScannerTest, TestScanComplexExpressions) {
     server::TokensManager tm = server::TokensManager();
     server::Scanner s = server::Scanner(tm, buf, buffer.size());
 
-    std::pair<tokens, std::string> scanResult = s.scan(true);
+    std::pair<tokens, std::string> scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "text/html");
 
-    scanResult = s.scan(true);
+    scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "charset");
 
-    scanResult = s.scan(true);
+    scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "UTF-8");
 }
@@ -193,15 +193,15 @@ TEST(ScannerTest, TestScanHeaderKVPair) {
     ASSERT_EQ(scanResult.first, CONTENT_TYPE);
     ASSERT_EQ(scanResult.second, "Content-Type");
 
-    scanResult = s.scan(true);
+    scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "multipart/form-data");
 
-    scanResult = s.scan(true);
+    scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "boundary");
 
-    scanResult = s.scan(true);
+    scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "something");
 }
@@ -249,15 +249,15 @@ TEST(ScannerTest, TestScanCRLF2) {
     ASSERT_EQ(scanResult.first, CONTENT_TYPE);
     ASSERT_EQ(scanResult.second, "Content-Type");
 
-    scanResult = s.scan(true);
+    scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "application/json");
 
-    scanResult = s.scan(true);
+    scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "charset");
 
-    scanResult = s.scan(true);
+    scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
     ASSERT_EQ(scanResult.second, "utf-8");
 }
@@ -285,7 +285,7 @@ TEST(ScannerTest, TestScanCompleteHeader) {
             result = s.scanKey();
             swapTime = true;
         } else {
-            result = s.scan(true);
+            result = s.scan();
             swapTime = false;
         }
 

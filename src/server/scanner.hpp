@@ -13,7 +13,7 @@ class Scanner {
         ~Scanner() = default;
 
         std::pair<tokens, std::string> scanDigit();
-        std::pair<tokens, std::string> scan(bool ignoreWhiteSpaces);
+        std::pair<tokens, std::string> scan();
         std::pair<tokens, std::string> scanString();
         std::pair<tokens, std::string> scanKey();
         std::pair<tokens, std::string> scanURL();

@@ -75,7 +75,7 @@ std::pair<tokens, std::string> Scanner::scanString() {
     return {STRING, buffer};
 };
 
-std::pair<tokens, std::string> Scanner::scan(bool ignoreWhiteSpaces) {
+std::pair<tokens, std::string> Scanner::scan() {
     std::string buffer;
     bool crSymbol = false;
 
@@ -102,7 +102,7 @@ std::pair<tokens, std::string> Scanner::scan(bool ignoreWhiteSpaces) {
         } else if (isLetter(ch) || isNumber(ch)) {
             buffer.push_back(ch);
             continue;
-        } else if (isWhiteSpace(ch) && ignoreWhiteSpaces) {
+        } else if (isWhiteSpace(ch)) {
             continue;
         } else if (isEqual(ch, '=') || isEqual(ch, ';') || isEqual(ch, ',')) {
             break;
