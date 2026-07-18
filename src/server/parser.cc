@@ -71,17 +71,15 @@ void Parser::parseGenAndEntityHeader() {
         };
         parserStack->push(sp);
 
-        lexResult = lex.scan();
-        if (lexResult.first == UNKNOWN) {
-            throw ParserException("invalid header value");
-        }
-
-        sp = SymbolPair{
-            .token = lexResult.first,
-            .literal = lexResult.second,
-        };
-        parserStack->push(sp);
-
+        do {
+            lexResult = lex.scan();
+            if (lexResult.first == UNKNOWN) {
+                throw ParserException("invalid header value");
+            }
+            sp = {lexResult.first, lexResult.second};
+            parserStack->push(sp);
+        } while (lex.lineBreakFound() && lexResult.first != CRLF);
+        
     }
 }
 
