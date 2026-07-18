@@ -161,6 +161,7 @@ void Scanner::unscan(ssize_t positions) {
 std::pair<tokens, std::string> Scanner::scanKey() {
     std::string buffer;
     bool crSymbol = false;
+    bool endOfHeader = false;
 
     for (;;) {
         char ch = readNext();
@@ -171,12 +172,17 @@ std::pair<tokens, std::string> Scanner::scanKey() {
                 break;
             }
 
+            if (buffer.size()) 
+                endOfHeader = true;
+
             crSymbol = true;
             continue;
         } else if (isLF(ch)) {
-            if (crSymbol) {
+            if (crSymbol && !endOfHeader) {
                 break;
-            } else {
+            } else if (crSymbol && endOfHeader) {
+                return {CRLF, ""};
+            }else {
                 buffer.clear();
                 break;
             }

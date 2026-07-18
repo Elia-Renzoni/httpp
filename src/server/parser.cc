@@ -1,5 +1,7 @@
 
+#include <iostream>
 #include "parser.hpp"
+
 
 namespace server {
 
@@ -59,9 +61,11 @@ void Parser::parseGenAndEntityHeader() {
 
     SymbolPair sp;
     for (;;) {
+        std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
         lexResult = lex.scanKey();
         if (lexResult.first == UNKNOWN) {
             lex.unscan(lexResult.second.size());
+            std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
             throw ParserException("invalid header");
         }
 
@@ -72,8 +76,10 @@ void Parser::parseGenAndEntityHeader() {
         parserStack->push(sp);
 
         do {
+            std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
             lexResult = lex.scan();
             if (lexResult.first == UNKNOWN) {
+                std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
                 throw ParserException("invalid header value");
             }
             sp = {lexResult.first, lexResult.second};
