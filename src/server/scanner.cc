@@ -44,7 +44,6 @@ std::pair<tokens, std::string> Scanner::scanDigit() {
 std::pair<tokens, std::string> Scanner::scanString() {
     std::string buffer;
     bool crSymbol = false;
-    lineBreak = false;
 
     for (;;) {
         char ch = readNext();
@@ -79,7 +78,7 @@ std::pair<tokens, std::string> Scanner::scanString() {
 std::pair<tokens, std::string> Scanner::scan() {
     std::string buffer;
     bool crSymbol = false;
-    bool endOfHeader = false;
+    lineBreak = false;
 
     for (;;) {
         char ch = readNext();
@@ -90,19 +89,14 @@ std::pair<tokens, std::string> Scanner::scan() {
                 break;
             }
 
-            // if the input buffe is empty, the first char encountered
-            // is a CR, thereby the end of header is near
-            if (buffer.size())
-                endOfHeader = true;
-
             crSymbol = true;
             continue;
         } else if (isLF(ch)) {
-            if (crSymbol && !endOfHeader) {
+            if (crSymbol) {
+                lineBreak = true;
                 break;
-            } else if (crSymbol && endOfHeader) {
-                return {CRLF, ""}; 
-            } else { buffer.clear();
+            } else { 
+                buffer.clear();
                 break;
             }
         } else if (ch == BUF_EOF) {
@@ -111,9 +105,11 @@ std::pair<tokens, std::string> Scanner::scan() {
             buffer.push_back(ch);
             continue;
         } else if (isWhiteSpace(ch)) {
+            if (buffer.empty()) continue;
+
+            buffer.push_back(ch);
             continue;
-        } else if (isEqual(ch, '=') || isEqual(ch, ';') || isEqual(ch, ',')) {
-            lineBreak = true;
+        } else if (isEqual(ch, '=') || isEqual(ch, ';')) {
             break;
         }
 
@@ -161,7 +157,6 @@ void Scanner::unscan(ssize_t positions) {
 std::pair<tokens, std::string> Scanner::scanKey() {
     std::string buffer;
     bool crSymbol = false;
-    bool endOfHeader = false;
 
     for (;;) {
         char ch = readNext();
@@ -172,17 +167,12 @@ std::pair<tokens, std::string> Scanner::scanKey() {
                 break;
             }
 
-            if (buffer.size()) 
-                endOfHeader = true;
-
             crSymbol = true;
             continue;
         } else if (isLF(ch)) {
-            if (crSymbol && !endOfHeader) {
+            if (crSymbol) {
                 break;
-            } else if (crSymbol && endOfHeader) {
-                return {CRLF, ""};
-            }else {
+            } else {
                 buffer.clear();
                 break;
             }
@@ -323,8 +313,12 @@ void Scanner::resetStateMachineWidth(tokens initState) {
     stateMachine.push_back(initState);
 };
 
-bool Scanner::lineBreakFound() {
+bool Scanner::isLineEnd() {
     return Scanner::lineBreak;
+}
+
+bool Scanner::isEOF() {
+    return currOffset >= buffer.size();
 }
 
 }

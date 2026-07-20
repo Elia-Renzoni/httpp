@@ -17,7 +17,8 @@ class Scanner {
         std::pair<tokens, std::string> scanString();
         std::pair<tokens, std::string> scanKey();
         std::pair<tokens, std::string> scanURL();
-        bool lineBreakFound();
+        bool isLineEnd();
+        bool isEOF();
         void unscan(ssize_t positions);
         void resetStateMachineWidth(tokens initState);
     private:

@@ -64,8 +64,9 @@ void Parser::parseGenAndEntityHeader() {
         std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
         lexResult = lex.scanKey();
         if (lexResult.first == UNKNOWN) {
+            if (lexResult.second.empty()) break;
+
             lex.unscan(lexResult.second.size());
-            std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
             throw ParserException("invalid header");
         }
 
@@ -76,16 +77,18 @@ void Parser::parseGenAndEntityHeader() {
         parserStack->push(sp);
 
         do {
-            std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
             lexResult = lex.scan();
             if (lexResult.first == UNKNOWN) {
-                std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
                 throw ParserException("invalid header value");
             }
-            sp = {lexResult.first, lexResult.second};
+            sp = SymbolPair {
+                lexResult.first, 
+              lexResult.second
+            };
             parserStack->push(sp);
-        } while (lex.lineBreakFound() && lexResult.first != CRLF);
-        
+        } while (lex.isLineEnd() && !lex.isEOF());
+
+        if (lex.isEOF()) break;
     }
 }
 
