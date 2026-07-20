@@ -9,7 +9,7 @@
 
 #pragma once
 
-namespace server {
+namespace parsing {
 
 class ParserException : public std::runtime_error {
     public:

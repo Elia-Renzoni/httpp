@@ -1,7 +1,7 @@
 
 #include "tokens.hpp"
 
-namespace server  {
+namespace parsing  {
 
 TokensManager::TokensManager() {
     createAndFillTokenMap();

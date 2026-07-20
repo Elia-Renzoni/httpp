@@ -3,7 +3,7 @@
 #include <optional>
 #include <unordered_map>
 
-namespace server {
+namespace parsing {
 
 enum tokens {
     // HTTP methods
