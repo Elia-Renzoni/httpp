@@ -17,6 +17,8 @@ class Scanner {
         std::pair<tokens, std::string> scanString();
         std::pair<tokens, std::string> scanKey();
         std::pair<tokens, std::string> scanURL();
+        bool isLineEnd();
+        bool isEOF();
         void unscan(ssize_t positions);
         void resetStateMachineWidth(tokens initState);
     private:
@@ -92,6 +94,7 @@ class Scanner {
         const char BUF_EOF = '\0';
         TokensManager tokManager;
         std::vector<tokens> stateMachine = {URL_SCHEMA};
+        bool lineBreak;
 };
 
 }

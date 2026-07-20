@@ -78,6 +78,7 @@ std::pair<tokens, std::string> Scanner::scanString() {
 std::pair<tokens, std::string> Scanner::scan() {
     std::string buffer;
     bool crSymbol = false;
+    lineBreak = false;
 
     for (;;) {
         char ch = readNext();
@@ -92,8 +93,9 @@ std::pair<tokens, std::string> Scanner::scan() {
             continue;
         } else if (isLF(ch)) {
             if (crSymbol) {
+                lineBreak = true;
                 break;
-            } else {
+            } else { 
                 buffer.clear();
                 break;
             }
@@ -103,6 +105,9 @@ std::pair<tokens, std::string> Scanner::scan() {
             buffer.push_back(ch);
             continue;
         } else if (isWhiteSpace(ch)) {
+            if (buffer.empty()) continue;
+
+            buffer.push_back(ch);
             continue;
         } else if (isEqual(ch, '=') || isEqual(ch, ';') || isEqual(ch, ',')) {
             break;
@@ -120,7 +125,6 @@ std::pair<tokens, std::string> Scanner::scan() {
             case '+':
             case '@':
             case '#':
-            case ',':
             case '$':
             case '<':
             case '>':
@@ -152,6 +156,7 @@ void Scanner::unscan(ssize_t positions) {
 std::pair<tokens, std::string> Scanner::scanKey() {
     std::string buffer;
     bool crSymbol = false;
+    bool endOfHeader = false;
 
     for (;;) {
         char ch = readNext();
@@ -162,11 +167,15 @@ std::pair<tokens, std::string> Scanner::scanKey() {
                 break;
             }
 
+            if (buffer.empty())
+                endOfHeader = true;
             crSymbol = true;
             continue;
         } else if (isLF(ch)) {
-            if (crSymbol) {
+            if (crSymbol && !endOfHeader) {
                 break;
+            } else if (crSymbol && endOfHeader) {
+                return {CRLF, ""};
             } else {
                 buffer.clear();
                 break;
@@ -307,5 +316,13 @@ void Scanner::resetStateMachineWidth(tokens initState) {
     stateMachine.clear();
     stateMachine.push_back(initState);
 };
+
+bool Scanner::isLineEnd() {
+    return Scanner::lineBreak;
+}
+
+bool Scanner::isEOF() {
+    return currOffset >= buffer.size();
+}
 
 }

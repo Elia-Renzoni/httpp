@@ -1,5 +1,7 @@
 
+#include <iostream>
 #include "parser.hpp"
+
 
 namespace server {
 
@@ -61,6 +63,8 @@ void Parser::parseGenAndEntityHeader() {
     for (;;) {
         lexResult = lex.scanKey();
         if (lexResult.first == UNKNOWN) {
+            if (lexResult.second.empty()) break;
+
             lex.unscan(lexResult.second.size());
             throw ParserException("invalid header");
         }
@@ -71,17 +75,21 @@ void Parser::parseGenAndEntityHeader() {
         };
         parserStack->push(sp);
 
-        lexResult = lex.scan();
-        if (lexResult.first == UNKNOWN) {
-            throw ParserException("invalid header value");
-        }
+        if (lexResult.first == CRLF) break;
 
-        sp = SymbolPair{
-            .token = lexResult.first,
-            .literal = lexResult.second,
-        };
-        parserStack->push(sp);
+        do {
+            lexResult = lex.scan();
+            if (lexResult.first == UNKNOWN) {
+                throw ParserException("invalid header value");
+            }
+            sp = SymbolPair {
+                lexResult.first, 
+              lexResult.second
+            };
+            parserStack->push(sp);
+        } while (!lex.isLineEnd() && !lex.isEOF());
 
+        if (lex.isEOF()) break;
     }
 }
 

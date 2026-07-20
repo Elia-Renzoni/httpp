@@ -59,7 +59,7 @@ TEST(TestParser, TestParseRequestLine) {
 }
 
 TEST(TestParser, TestCompleteHeader) {
-    std::string inputBuffer = "Content-Type: text/html; charset=UTF-8\r\nContent-Length: 1845\r\nConnection: keep-alive\r\nCache-Control: no-cache, private";
+    std::string inputBuffer = "Content-Type: text/html; charset=UTF-8\r\nContent-Length: 1845\r\nConnection: keep-alive\r\nCache-Control: no-cache, private\r\n\r\n";
     char *buf = inputBuffer.data();
     std::vector<std::pair<tokens, std::string>> expOut = {
         {CONTENT_TYPE, "Content-Type"},
@@ -71,7 +71,9 @@ TEST(TestParser, TestCompleteHeader) {
         {CONNECTION, "Connection"},
         {STRING, "keep-alive"},
         {CACHE_CONTROL, "Cache-Control"},
-        {STRING, "no-cache, private"},
+        {STRING, "no-cache"},
+        {STRING, "private"},
+        {CRLF, ""},
     };
 
     server::TokensManager tm = server::TokensManager();
