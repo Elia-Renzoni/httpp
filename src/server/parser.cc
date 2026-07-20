@@ -61,7 +61,6 @@ void Parser::parseGenAndEntityHeader() {
 
     SymbolPair sp;
     for (;;) {
-        std::cout << "stack content: "<< lexResult.first << lexResult.second << "\n";
         lexResult = lex.scanKey();
         if (lexResult.first == UNKNOWN) {
             if (lexResult.second.empty()) break;
@@ -76,6 +75,8 @@ void Parser::parseGenAndEntityHeader() {
         };
         parserStack->push(sp);
 
+        if (lexResult.first == CRLF) break;
+
         do {
             lexResult = lex.scan();
             if (lexResult.first == UNKNOWN) {
@@ -86,7 +87,7 @@ void Parser::parseGenAndEntityHeader() {
               lexResult.second
             };
             parserStack->push(sp);
-        } while (lex.isLineEnd() && !lex.isEOF());
+        } while (!lex.isLineEnd() && !lex.isEOF());
 
         if (lex.isEOF()) break;
     }

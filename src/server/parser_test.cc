@@ -71,7 +71,8 @@ TEST(TestParser, TestCompleteHeader) {
         {CONNECTION, "Connection"},
         {STRING, "keep-alive"},
         {CACHE_CONTROL, "Cache-Control"},
-        {STRING, "no-cache, private"},
+        {STRING, "no-cache"},
+        {STRING, "private"},
         {CRLF, ""},
     };
 
