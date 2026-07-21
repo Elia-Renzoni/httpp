@@ -3,14 +3,14 @@
 
 #include "scanner.hpp"
 
-using namespace server;
+using namespace parsing;
 
 TEST(ScannerTest, TestScanSimpleDigits) {
     std::string buffer = "1234";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanDigit();
 
@@ -22,8 +22,8 @@ TEST(ScannerTest, TestScanMixedBuffer) {
     std::string buffer = "1234a";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanDigit();
     ASSERT_EQ(scanResult.first, INTEGER);
@@ -34,8 +34,8 @@ TEST(ScannerTest, TestScanMixedBuffer2) {
     std::string buffer = "12a34";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanDigit();
     ASSERT_EQ(scanResult.first, INTEGER);
@@ -46,8 +46,8 @@ TEST(ScannerTest, TestScanUnknownDigits) {
     std::string buffer = "abcdefg-";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanDigit();
     ASSERT_EQ(scanResult.first, UNKNOWN);
@@ -58,8 +58,8 @@ TEST(ScannerTest, TestScanStrings) {
     std::string buffer = "abcdefg";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanString();
     ASSERT_EQ(scanResult.first, STRING);
@@ -70,8 +70,8 @@ TEST(ScannerTest, TestScanStringsMixed) {
     std::string buffer = "ab%";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanString();
     ASSERT_EQ(scanResult.first, STRING);
@@ -82,8 +82,8 @@ TEST(ScannerTest, TestGeneralScan) {
     std::string buffer = "ab%<>";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
@@ -94,8 +94,8 @@ TEST(ScannerTest, TestScanRandomString) {
     std::string buffer = "U12-";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
@@ -106,8 +106,8 @@ TEST(ScannerTest, TestScanHeaderKey) {
     std::string buffer = "User-Agent:";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, USER_AGENT);
@@ -118,8 +118,8 @@ TEST(ScannerTest, TestScanHeaderKeyWithErrors) {
     std::string buffer = "User-Agent : ";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, UNKNOWN);
@@ -130,8 +130,8 @@ TEST(ScannerTest, TestScanHTTPVersion2) {
     std::string buffer = "HTTP/2";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, HTTP_2);
@@ -142,8 +142,8 @@ TEST(ScannerTest, TestScanHTTPVersion11) {
     std::string buffer = "HTTP/1.1";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, HTTP_1_1);
@@ -154,8 +154,8 @@ TEST(ScannerTest, TestScanHTTPVersion3) {
     std::string buffer = "HTTP/3";
     char* buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, HTTP_3);
@@ -166,8 +166,8 @@ TEST(ScannerTest, TestScanComplexExpressions) {
     std::string buffer = "text/html; charset=UTF-8";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scan();
     ASSERT_EQ(scanResult.first, STRING);
@@ -186,8 +186,8 @@ TEST(ScannerTest, TestScanHeaderKVPair) {
     std::string buffer = "Content-Type: multipart/form-data; boundary=something";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, CONTENT_TYPE);
@@ -210,8 +210,8 @@ TEST(ScannerTest, TestScanHeaderKVPair2) {
     std::string buffer = "Content-Length: 348";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, CONTENT_LENGTH);
@@ -226,8 +226,8 @@ TEST(ScannerTest, TestScanCRLF) {
     std::string buffer = "Content-Length: 348\r\n";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, CONTENT_LENGTH);
@@ -242,8 +242,8 @@ TEST(ScannerTest, TestScanCRLF2) {
     std::string buffer = "Content-Type: application/json; charset=utf-8\r\n";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
     ASSERT_EQ(scanResult.first, CONTENT_TYPE);
@@ -266,8 +266,8 @@ TEST(ScannerTest, TestScanCompleteHeader) {
     std::string buffer = "User-Agent: Mozilla/5.0\r\nAccept: text/html\r\nConnection: keep-alive\r\n";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::vector<std::pair<tokens, std::string>> exp = {
         {USER_AGENT, "User-Agent"},
@@ -298,8 +298,8 @@ TEST(ScannerTest, TestScanURL) {
     std::string buffer = "https://www.google.com/search?id=10";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::vector<std::pair<tokens, std::string>> expResult = {
         {URL_SCHEMAS, "https"},
@@ -320,8 +320,8 @@ TEST(ScannerTest, TestScanURL2) {
     std::string buffer = "http://192.90.90.2:4040/deleteall";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::vector<std::pair<tokens, std::string>> expResults = {
         {URL_SCHEMA, "http"},
@@ -340,8 +340,8 @@ TEST(ScannerTest, TestScanURL3) {
     std::string buffer = "http://www.foo.edu/bar/foo/bar2";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::vector<std::pair<tokens, std::string>> expResult = {
         {URL_SCHEMA, "http"},
@@ -360,8 +360,8 @@ TEST(ScannerTest, TestScanURL4) {
     std::string buffer = "https://127.0.0.1:8080/search?id=123&name=foo+bar";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::vector<std::pair<tokens, std::string>> expResult = {
         {URL_SCHEMAS, "https"},
@@ -384,8 +384,8 @@ TEST(ScannerTest, TestScanURL5) {
     std::string buffer = "http://it.wikipedia.org/wiki/rome#monuments_and_pplaces27";
     char *buf = buffer.data();
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, buffer.size());
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::vector<std::pair<tokens, std::string>> expResult = {
         {URL_SCHEMA, "http"},

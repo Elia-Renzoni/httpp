@@ -1,8 +1,7 @@
 
-#include <iostream>
 #include "scanner.hpp"
 
-namespace server {
+namespace parsing {
 
 std::pair<tokens, std::string> Scanner::scanDigit() {
     std::string buffer;

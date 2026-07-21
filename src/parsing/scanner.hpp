@@ -5,7 +5,7 @@
 
 #pragma once
 
-namespace server {
+namespace parsing {
 
 class Scanner {
     public:

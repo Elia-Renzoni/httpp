@@ -5,7 +5,7 @@
 #include "parser.hpp"
 #include "scanner.hpp"
 
-using namespace server;
+using namespace parsing;
 
 void assertMulti(const std::vector<SymbolPair>& got, const std::vector<std::pair<tokens, std::string>>& exp) {
     ASSERT_EQ(got.size(), exp.size());
@@ -38,9 +38,9 @@ TEST(TestParser, TestParseRequestLine) {
     for (int i = 0; i < inputs.size(); i++) {
         char *buf = inputs[i].data();
 
-        server::TokensManager tm = server::TokensManager();
-        server::Scanner s = server::Scanner(tm, buf, inputs[i].size());
-        server::Parser p = server::Parser(s);
+        parsing::TokensManager tm = parsing::TokensManager();
+        parsing::Scanner s = parsing::Scanner(tm, buf, inputs[i].size());
+        parsing::Parser p = parsing::Parser(s);
 
         try {
             p.parseRequestLine();
@@ -76,9 +76,9 @@ TEST(TestParser, TestCompleteHeader) {
         {CRLF, ""},
     };
 
-    server::TokensManager tm = server::TokensManager();
-    server::Scanner s = server::Scanner(tm, buf, inputBuffer.size());
-    server::Parser p = server::Parser(s);
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, inputBuffer.size());
+    parsing::Parser p = parsing::Parser(s);
 
     try {
         p.parseGenAndEntityHeader();

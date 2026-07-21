@@ -1,9 +1,8 @@
 
-#include <iostream>
 #include "parser.hpp"
 
 
-namespace server {
+namespace parsing {
 
 void Parser::parseRequestLine() {
     std::pair<tokens, std::string> result;
