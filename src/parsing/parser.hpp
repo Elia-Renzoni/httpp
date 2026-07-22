@@ -41,10 +41,6 @@ struct PStack {
         stack.pop_back();
     }
 
-    std::vector<SymbolPair>::iterator getStackIterator() {
-        return stack.begin();
-    }
-
     void clearAll() {
         stack.clear();
     }
