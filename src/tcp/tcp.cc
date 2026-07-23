@@ -10,7 +10,7 @@ char* TCPConn::readUntil() {
     char *streamBuffer = new char[2048];
     auto len = read(socketFileDescriptor, streamBuffer, 2048);
     if (len <= -1 || len == 0) {
-        closeConn();
+        close(socketFileDescriptor);
         return NULL; 
     }
     return streamBuffer;
@@ -22,7 +22,7 @@ void TCPConn::write(const std::string& data) {
 
     auto result = send(socketFileDescriptor, dataToSend, sizeof(dataToSend), 0);
     if (result == 0 || result <= -1)
-        closeConn();
+        close(socketFileDescriptor);
 };
 
 

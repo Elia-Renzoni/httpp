@@ -17,11 +17,9 @@ class NetworkStream {
     protected:
         NetworkStream(std::string& addr, int& port): listenerAddress(addr), listenerPort(port){};
 
-        void setupTCP();
-        void listenTCP();
-        void bindTCP();
-        std::pair<char*,std::pair<ssize_t, int>> acceptTCP();
         void closeTCP();
+        void bindAndlistenTCP();
+        std::pair<char*,std::pair<ssize_t, int>> acceptTCP();
     private:
         std::string listenerAddress;
         int listenerPort;

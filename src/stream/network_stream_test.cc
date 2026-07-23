@@ -15,9 +15,7 @@ public:
     TestableNetworkStream(std::string& addr, int& port) : NetworkStream(addr, port) {}
 
     // Expose protected methods as public for testing
-    using NetworkStream::setupTCP;
-    using NetworkStream::listenTCP;
-    using NetworkStream::bindTCP;
+    using NetworkStream::bindAndlistenTCP;
     using NetworkStream::acceptTCP;
     using NetworkStream::closeTCP;
 };
@@ -58,9 +56,7 @@ TEST(NetworkStreamTest, TCPServerReceivesMessage) {
 
     TestableNetworkStream server(test_address, test_port);
     try {
-        server.setupTCP();
-        server.bindTCP();
-        server.listenTCP();
+        server.bindAndlistenTCP();
     } catch (const NetworkError& e) {
         std::cerr << "server error: " << e.what() << std::endl;
         FAIL();
