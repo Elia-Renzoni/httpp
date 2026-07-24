@@ -59,7 +59,7 @@ std::pair<char*, std::pair<ssize_t, int>> NetworkStream::acceptTCP() {
     if (recvLen < receiveBufferMaxSize) 
         recvBuffer[recvLen] = '\0';
     else
-        recvBuffer[receiveBufferMaxSize] = '\0';
+        recvBuffer[receiveBufferMaxSize - 1] = '\0';
     return {recvBuffer, {recvLen, socketFileDescriptor}};
 }
 
