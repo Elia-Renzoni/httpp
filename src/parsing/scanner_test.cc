@@ -114,7 +114,7 @@ TEST(ScannerTest, TestScanHeaderKey) {
     ASSERT_EQ(scanResult.second, "User-Agent");
 }
 
-TEST(ScannerTest, TestScanHeaderKeyWithErrors) {
+TEST(ScannerTest, TestScanHeaderKeyWithSpace) {
     std::string buffer = "User-Agent : ";
     char* buf = buffer.data();
 
@@ -122,7 +122,7 @@ TEST(ScannerTest, TestScanHeaderKeyWithErrors) {
     parsing::Scanner s = parsing::Scanner(tm, buf, buffer.size());
 
     std::pair<tokens, std::string> scanResult = s.scanKey();
-    ASSERT_EQ(scanResult.first, UNKNOWN);
+    ASSERT_EQ(scanResult.first, USER_AGENT);
     ASSERT_EQ(scanResult.second, "User-Agent");
 }
 
