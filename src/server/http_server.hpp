@@ -16,6 +16,7 @@ class Http : public stream::NetworkStream {
         void listenAndServe();
     private:
         void handlePacket(tcp::TCPConn& conn) {
+            
         };
 
         std::string address;

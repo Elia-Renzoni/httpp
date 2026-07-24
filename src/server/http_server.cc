@@ -9,7 +9,7 @@ void Http::listenAndServe() {
 
     for (;;) {
         std::pair<char*, std::pair<ssize_t, int>> conn = stream::NetworkStream::acceptTCP();
-        tcp::TCPConn tcpConn(conn.second.second); // pass the socket file descriptor as parameter
+        tcp::TCPConn tcpConn(conn.second.second, conn.first); // pass the socket file descriptor as parameter and also the first bytes readed
          
     }
 }
