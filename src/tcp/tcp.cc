@@ -6,6 +6,10 @@
 
 namespace tcp {
 
+char *TCPConn::readInitialBuffer() {
+    return initialBuffer;
+};
+
 char* TCPConn::readUntil() {
     char *streamBuffer = new char[2048];
     auto len = read(socketFileDescriptor, streamBuffer, 2048);
