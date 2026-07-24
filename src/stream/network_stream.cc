@@ -7,6 +7,11 @@
 
 namespace stream { 
 
+NetworkStream::NetworkStream(std::string& addr, int& port, int& customRecvBufferSize): listenerAddress(addr), listenerPort(port) {
+    if (customRecvBufferSize == 0 || customRecvBufferSize < 0)
+        throw std::runtime_error("invalid receive buffer size");
+    this->receiveBufferMaxSize = customRecvBufferSize;
+}
 void NetworkStream::closeTCP() {
     close(socketFileDescriptor);
 };
@@ -44,17 +49,17 @@ std::pair<char*, std::pair<ssize_t, int>> NetworkStream::acceptTCP() {
          close(socketFileDescriptor);
          throw NetworkError("accept failed");
     }
-    char* recvBuffer = new char[5048];
-    ssize_t recvLen = read(sock, recvBuffer, 5048);
+    char* recvBuffer = new char[receiveBufferMaxSize];
+    ssize_t recvLen = read(sock, recvBuffer, receiveBufferMaxSize);
     if (recvLen == -1) {
          close(socketFileDescriptor);
          throw NetworkError("failed to read data");
     }
 
-    if (recvLen < 5048) 
+    if (recvLen < receiveBufferMaxSize) 
         recvBuffer[recvLen] = '\0';
     else
-        recvBuffer[5047] = '\0';
+        recvBuffer[receiveBufferMaxSize] = '\0';
     return {recvBuffer, {recvLen, socketFileDescriptor}};
 }
 
