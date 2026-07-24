@@ -6,18 +6,18 @@
 
 namespace tcp {
 
-char *TCPConn::readInitialBuffer() {
-    return initialBuffer;
+std::pair<char*, ssize_t> TCPConn::readInitialBuffer() {
+    return {initialBuffer, initialBufferLen};
 };
 
-char* TCPConn::readUntil() {
+std::pair<char*, ssize_t> TCPConn::readUntil() {
     char *streamBuffer = new char[2048];
     auto len = read(socketFileDescriptor, streamBuffer, 2048);
     if (len <= -1 || len == 0) {
         close(socketFileDescriptor);
-        return NULL; 
+        throw std::runtime_error("something went wrong while reading data from TCP");
     }
-    return streamBuffer;
+    return {streamBuffer, len};
 };
 
 void TCPConn::write(const std::string& data) {
