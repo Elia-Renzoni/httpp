@@ -15,7 +15,9 @@ class NetworkError : public std::runtime_error {
 
 class NetworkStream {
     protected:
-        NetworkStream(std::string& addr, int& port): listenerAddress(addr), listenerPort(port){};
+        NetworkStream(std::string& addr, int& port): listenerAddress(addr), listenerPort(port), receiveBufferMaxSize(5048){};
+        NetworkStream(std::string& addr, int& port, int& customRecvBufferSize);
+        ~NetworkStream() = default;
 
         void closeTCP();
         void bindAndlistenTCP();
@@ -24,6 +26,7 @@ class NetworkStream {
         std::string listenerAddress;
         int listenerPort;
         int socketFileDescriptor;
+        int receiveBufferMaxSize;
 
         struct sockaddr_in serverAddress = {0};
 };
