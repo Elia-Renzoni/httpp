@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <iostream>
 #include "../stream/network_stream.hpp"
 #include "../tcp/tcp.hpp"
 #include "../parsing/parser.hpp"
@@ -86,8 +85,6 @@ PARSE:
                 conn.write(response);
                 conn.closeConn();
             }
-
-            // step 1. find request endpoint
 
         };
 

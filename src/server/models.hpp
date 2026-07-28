@@ -7,6 +7,7 @@ namespace {
 struct Request {
     std::string methodType;
     std::string protocolType;
+    std::string endpoint;
     std::unordered_map<std::string, std::string> headers;
     int contentLength;
     std::string host;
