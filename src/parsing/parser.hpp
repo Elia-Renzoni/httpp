@@ -56,7 +56,9 @@ struct PStack {
 
     void walkStack(Request &req) {
         // handle the request line first
-        for (auto i = 0; i < watermark; i++) {
+        // 3 represent the number of elements in a request line
+        // i.e 1. method type 2. endpoint 3. protcol type
+        for (auto i = 0; i < 3; i++) {
             SymbolPair entry = stack.back();
             if (i < 1) {
                 req.methodType = entry.literal;
@@ -64,7 +66,23 @@ struct PStack {
 
             if (i == 1) {
                 if (entry.token == URL_ENDPOINT) {
+                    req.endpoint = entry.literal;
 
+                    // check for query parameters
+                    for (auto i = 2; i < watermark; i++) {
+                        entry = stack.back();
+                        if (entry.token == URL_QUERY) {
+                            SymbolPair queryLiteral = stack.back();
+                            req.queryParameters[entry.literal] = queryLiteral.literal;
+                        } else {
+                            req.protocolType = entry.literal;
+                        }
+                    }
+
+                }
+
+                if (entry.token == HOST) {
+                    req.host = entry.literal;
                 }
             }
 
@@ -72,6 +90,18 @@ struct PStack {
                 req.protocolType = entry.literal;
             }
         }
+
+        // handle the general header
+        SymbolPair entry;
+        std::string headerKey;
+        do {
+            entry = stack.back();
+            if (entry.token != STRING) {
+                headerKey = entry.literal;
+            } else {
+                req.headers[headerKey].push_back(entry.literal);
+            }
+        } while (entry.token != CRLF);
     }
 };
 

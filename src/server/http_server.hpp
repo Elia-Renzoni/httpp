@@ -86,6 +86,10 @@ PARSE:
                 conn.closeConn();
             }
 
+            // populate the request struct with the parsed data
+            Request req;
+            parser.parserStack->walkStack(req);
+
         };
 
         bool isHeaderReached(char *data, ssize_t totalBytes) {
