@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include "scanner.hpp"
+#include "../server/models.hpp"
 
 #pragma once
 
@@ -44,11 +45,23 @@ struct PStack {
     void clearAll() {
         stack.clear();
     }
+
+    int stackLen() {
+        return stack.size();
+    }
+
+    void updateWatermark(int value) {
+        watermark += value;
+    }
+
+    void walkStack(Request &req) {
+
+    }
 };
 
 class Parser {
     public:
-        Parser(Scanner& lexer): 
+        Parser(Scanner& lexer):
            lex(lexer), parserStack(std::make_unique<PStack>()) {};
         ~Parser() = default;
 
@@ -104,7 +117,7 @@ class Parser {
             for (const auto& tok : entityHeadToks) {
                 if (caller == CALLER_IS_ENTITYH && tok == headerTokType)
                     result = true;
-             
+
                 if (caller == CALLER_IS_GENERALH && tok == headerTokType)
                     result = false;
             }

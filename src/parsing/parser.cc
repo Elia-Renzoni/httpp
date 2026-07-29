@@ -53,6 +53,7 @@ void Parser::parseRequestLine() {
     };
 
     parserStack->push(protocolPair);
+    parserStack->updateWatermark(parserStack->stackLen());
 }
 
 void Parser::parseGenAndEntityHeader() {
@@ -82,7 +83,7 @@ void Parser::parseGenAndEntityHeader() {
                 throw ParserException("invalid header value");
             }
             sp = SymbolPair {
-                lexResult.first, 
+                lexResult.first,
               lexResult.second
             };
             parserStack->push(sp);
