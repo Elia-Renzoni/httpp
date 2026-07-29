@@ -1,14 +1,17 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
+#include <functional>
 #include "../stream/network_stream.hpp"
 #include "../tcp/tcp.hpp"
 #include "../parsing/parser.hpp"
 #include "../parsing/scanner.hpp"
+#include "models.hpp"
 
 namespace server {
- 
+
+using HttpHandler = std::function<void(Request, Response&)>;
+
 class Http : public stream::NetworkStream {
     public:
         Http(std::string& addr, int port): address(addr), port(port), maxHeaderBytes(16384), stream::NetworkStream(addr, port) {};
@@ -18,6 +21,7 @@ class Http : public stream::NetworkStream {
         ~Http() = default;
 
         void listenAndServe();
+        void handleFunc(std::string endpoint, HttpHandler handler);
     private:
         std::string buildHTTPResponse(std::string statusCode, std::string reason, std::string body) {
             std::string response =
@@ -61,7 +65,7 @@ class Http : public stream::NetworkStream {
                 conn.write(response);
                 conn.closeConn();
             }
-            
+
             if (totalBytes > maxHeaderBytes) {
                 std::string response = buildHTTPResponse("431", "Request Header Fields Too Large", "");
                 conn.write(response);
@@ -82,8 +86,6 @@ PARSE:
                 conn.closeConn();
             }
 
-            // TODO-> handle endpoint rounting
-
         };
 
         bool isHeaderReached(char *data, ssize_t totalBytes) {
@@ -100,6 +102,7 @@ PARSE:
         std::string address;
         int port;
         size_t  maxHeaderBytes; // 16kb as a default value
+        std::unordered_map<std::string, HttpHandler> routeMap;
 };
 
 }
