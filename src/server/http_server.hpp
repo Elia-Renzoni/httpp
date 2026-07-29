@@ -6,7 +6,6 @@
 #include "../tcp/tcp.hpp"
 #include "../parsing/parser.hpp"
 #include "../parsing/scanner.hpp"
-#include "models.hpp"
 
 namespace server {
 
@@ -90,6 +89,18 @@ PARSE:
             Request req;
             parser.parserStack->walkStack(req);
 
+            if (!(routeMap.count(req.endpoint))) {
+                std::string response = buildHTTPResponse("400", "Bad Request", "function handler not found for " + req.endpoint);
+                conn.write(response);
+                conn.closeConn();
+            }
+
+            HttpHandler func = routeMap[req.endpoint];
+
+            Response res;
+
+            // execute user-provided function handler
+            func(req, res);
         };
 
         bool isHeaderReached(char *data, ssize_t totalBytes) {

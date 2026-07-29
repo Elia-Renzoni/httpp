@@ -58,10 +58,13 @@ struct PStack {
         // handle the request line first
         // 3 represent the number of elements in a request line
         // i.e 1. method type 2. endpoint 3. protcol type
+        // GET /index.html HTTP/1.1
+        // Content-Type: application/json
         for (auto i = 0; i < 3; i++) {
             SymbolPair entry = stack.back();
             if (i < 1) {
                 req.methodType = entry.literal;
+                continue;
             }
 
             if (i == 1) {
@@ -69,6 +72,7 @@ struct PStack {
                     req.endpoint = entry.literal;
 
                     // check for query parameters
+                    // start the search by ignoring the first two tokens (method type and url endpoint)
                     for (auto i = 2; i < watermark; i++) {
                         entry = stack.back();
                         if (entry.token == URL_QUERY) {
@@ -76,6 +80,7 @@ struct PStack {
                             req.queryParameters[entry.literal] = queryLiteral.literal;
                         } else {
                             req.protocolType = entry.literal;
+                            break;
                         }
                     }
 
@@ -83,6 +88,7 @@ struct PStack {
 
                 if (entry.token == HOST) {
                     req.host = entry.literal;
+                    continue;
                 }
             }
 
