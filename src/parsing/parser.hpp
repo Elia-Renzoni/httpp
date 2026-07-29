@@ -55,7 +55,19 @@ struct PStack {
     }
 
     void walkStack(Request &req) {
+        // handle the request line first
+        for (auto i = 0; i < watermark; i++) {
+            SymbolPair entry = stack.back();
+            if (i < 1) {
+                req.methodType = entry.literal;
+            }
 
+            // TODO-> handle the case when i == 1
+
+            if (i > 1) {
+                req.protocolType = entry.literal;
+            }
+        }
     }
 };
 
