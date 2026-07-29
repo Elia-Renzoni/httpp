@@ -62,7 +62,11 @@ struct PStack {
                 req.methodType = entry.literal;
             }
 
-            // TODO-> handle the case when i == 1
+            if (i == 1) {
+                if (entry.token == URL_ENDPOINT) {
+
+                }
+            }
 
             if (i > 1) {
                 req.protocolType = entry.literal;
