@@ -52,12 +52,11 @@ class Http : public stream::NetworkStream {
                 conn.closeConn();
             }
 
-            do {
-                buffer = conn.readUntil();
-                data = buffer.first;
-                totalBytes += buffer.second;
-                mergedChunks.insert(mergedChunks.end(), data, data + totalBytes);
-            } while (!isHeaderReached(data, totalBytes) && totalBytes <= maxHeaderBytes);
+            tcpContext ctx = tcpContext {
+                .conn = conn,
+                .totalBytesToRead = -1, // -1 = unknown
+            };
+            collectTCPSegments(mergedChunks, ctx);
 
             if (!isHeaderReached(mergedChunks.data(), totalBytes)) {
                 std::string response = buildHTTPResponse("400", "Bad Request", "");
@@ -95,6 +94,11 @@ PARSE:
                 conn.closeConn();
             }
 
+            if (req.contentLength > 0) {
+                ctx.totalBytesToRead = req.contentLength;
+                collectTCPSegments(mergedChunks, ctx);
+            }
+
             HttpHandler func = routeMap[req.endpoint];
 
             Response res;
@@ -102,6 +106,26 @@ PARSE:
             // execute user-provided function handler
             func(req, res);
         };
+
+        void collectTCPSegments(std::vector<char>& chunks, tcpContext ctx) {
+            std::pair<char*, ssize_t> buffer;
+            char *data;
+            ssize_t totalBytes;
+            ssize_t maxBytesToRead;
+
+            if (ctx.totalBytesToRead > 0) {
+                maxBytesToRead = ctx.totalBytesToRead;
+            } else {
+                maxBytesToRead = maxHeaderBytes;
+            }
+
+            do {
+                buffer = ctx.conn.readUntil();
+                data = buffer.first;
+                totalBytes += buffer.second;
+                chunks.insert(chunks.end(), data, data + totalBytes);
+            } while (!isHeaderReached(data, totalBytes) && totalBytes <= maxHeaderBytes);
+        }
 
         bool isHeaderReached(char *data, ssize_t totalBytes) {
             if (totalBytes >= 4) {
@@ -118,6 +142,11 @@ PARSE:
         int port;
         size_t  maxHeaderBytes; // 16kb as a default value
         std::unordered_map<std::string, HttpHandler> routeMap;
+        
+        struct tcpContext {
+            tcp::TCPConn conn;
+            ssize_t totalBytesToRead;
+        };
 };
 
 }
