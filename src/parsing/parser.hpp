@@ -55,60 +55,51 @@ struct PStack {
     }
 
     void walkStack(Request &req) {
-        // handle the request line first
-        // 3 represent the number of elements in a request line
-        // i.e 1. method type 2. endpoint 3. protcol type
-        // GET /index.html HTTP/1.1
-        // Content-Type: application/json
-        for (auto i = 0; i < 3; i++) {
-            SymbolPair entry = stack.back();
-            if (i < 1) {
+        if (stack.empty()) return;
+
+        for (int i = 0; i < watermark; i++) {
+            const auto& entry = stack[i];
+
+            if (i == 0) {
                 req.methodType = entry.literal;
-                continue;
             }
 
-            if (i == 1) {
-                if (entry.token == URL_ENDPOINT) {
-                    req.endpoint = entry.literal;
+            if (entry.token == URL_ENDPOINT) {
+                req.endpoint = entry.literal;
+            } else if (entry.token == URL_QUERY) {
+                std::string key = entry.literal;
+                std::string val = "";
 
-                    // check for query parameters
-                    // start the search by ignoring the first two tokens (method type and url endpoint)
-                    for (auto i = 2; i < watermark; i++) {
-                        entry = stack.back();
-                        if (entry.token == URL_QUERY) {
-                            SymbolPair queryLiteral = stack.back();
-                            req.queryParameters[entry.literal] = queryLiteral.literal;
-                        } else {
-                            req.protocolType = entry.literal;
-                            break;
-                        }
-                    }
-
+                if (i + 1 < watermark) {
+                    val = stack[++i].literal;
                 }
-
-                if (entry.token == HOST) {
-                    req.host = entry.literal;
-                    continue;
-                }
-            }
-
-            if (i > 1) {
+                req.queryParameters[key] = val;
+            } else {
                 req.protocolType = entry.literal;
             }
         }
 
-        // handle the general header
-        SymbolPair entry;
-        std::string headerKey;
-        do {
-            entry = stack.back();
-            if (entry.token != STRING) {
-                headerKey = entry.literal;
-            } else {
-                req.headers[headerKey].push_back(entry.literal);
+        std::string currentHeaderKey = "";
+        for (size_t i = watermark; i < stack.size(); i++) {
+            const auto& entry = stack[i];
+
+            if (entry.token == CRLF) {
+                continue;
             }
-        } while (entry.token != CRLF);
+
+            if (entry.token != STRING) {
+                currentHeaderKey = entry.literal;
+            } else {
+                if (!currentHeaderKey.empty())
+                    req.headers[currentHeaderKey].push_back(entry.literal);
+            }
+        }
+
+        if (req.headers.count("Content-Length") && !req.headers["Content-Length"].empty()) {
+            req.contentLength = std::stoi(req.headers["Content-Length"].back());
+        }
     }
+
 };
 
 class Parser {
