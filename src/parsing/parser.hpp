@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include "scanner.hpp"
+#include "../server/models.hpp"
 
 #pragma once
 
@@ -44,11 +45,66 @@ struct PStack {
     void clearAll() {
         stack.clear();
     }
+
+    int stackLen() {
+        return stack.size();
+    }
+
+    void updateWatermark(int value) {
+        watermark += value;
+    }
+
+    void walkStack(Request &req) {
+        if (stack.empty()) return;
+
+        for (int i = 0; i < watermark; i++) {
+            const auto& entry = stack[i];
+
+            if (i == 0) {
+                req.methodType = entry.literal;
+            }
+
+            if (entry.token == URL_ENDPOINT) {
+                req.endpoint = entry.literal;
+            } else if (entry.token == URL_QUERY) {
+                std::string key = entry.literal;
+                std::string val = "";
+
+                if (i + 1 < watermark) {
+                    val = stack[++i].literal;
+                }
+                req.queryParameters[key] = val;
+            } else {
+                req.protocolType = entry.literal;
+            }
+        }
+
+        std::string currentHeaderKey = "";
+        for (size_t i = watermark; i < stack.size(); i++) {
+            const auto& entry = stack[i];
+
+            if (entry.token == CRLF) {
+                continue;
+            }
+
+            if (entry.token != STRING) {
+                currentHeaderKey = entry.literal;
+            } else {
+                if (!currentHeaderKey.empty())
+                    req.headers[currentHeaderKey].push_back(entry.literal);
+            }
+        }
+
+        if (req.headers.count("Content-Length") && !req.headers["Content-Length"].empty()) {
+            req.contentLength = std::stoi(req.headers["Content-Length"].back());
+        }
+    }
+
 };
 
 class Parser {
     public:
-        Parser(Scanner& lexer): 
+        Parser(Scanner& lexer):
            lex(lexer), parserStack(std::make_unique<PStack>()) {};
         ~Parser() = default;
 
@@ -104,7 +160,7 @@ class Parser {
             for (const auto& tok : entityHeadToks) {
                 if (caller == CALLER_IS_ENTITYH && tok == headerTokType)
                     result = true;
-             
+
                 if (caller == CALLER_IS_GENERALH && tok == headerTokType)
                     result = false;
             }

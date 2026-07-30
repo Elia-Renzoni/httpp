@@ -94,5 +94,48 @@ TEST(TestParser, TestCompleteHeader) {
     assertMulti(gotSymbolList, expOut);
 }
 
-// g++ -std=c++17 parser_test.cc parser.cc scanner.cc tokens.cpp -o parser_test -lgtest -lgtest_main -pthread
+TEST(TestParser, TestWalkStack) {
+    std::string completeHeader = "GET /api/users?id=42&active=true HTTP/1.1\r\nHost: api.example.com\r\nUser-Agent: Mozilla/5.0\r\nAccept: application/json, text/plain\r\n\r\n";
+    Request out = Request {
+        .methodType = "GET",
+        .protocolType = "HTTP/1.1",
+        .endpoint = "/api/users",
+        .queryParameters = std::unordered_map<std::string, std::string> {
+            {"id", "42"},
+            {"active", "true"},
+        },
+        .headers = std::unordered_map<std::string, std::vector<std::string>> {
+            {"Host", {"api.example.com"}},
+            {"User-Agent", {"Mozilla/5.0"}},
+            {"Accept", {"application/json", "text/plain"}}
+        },
+    };
 
+    char *buf = completeHeader.data();
+
+    parsing::TokensManager tm = parsing::TokensManager();
+    parsing::Scanner s = parsing::Scanner(tm, buf, completeHeader.size());
+    parsing::Parser p = parsing::Parser(s);
+
+    try {
+        p.parseRequestLine();
+        p.parseGenAndEntityHeader();
+    } catch (ParserException& exp) {
+        std::cout << exp.what();
+        for (const auto& entry : p.parserStack->stack) {
+            std::cout << "token: " << entry.token << " literal: " << entry.literal << "\n";
+        }
+        FAIL();
+    }
+
+    Request got;
+    p.parserStack->walkStack(got);
+
+    EXPECT_EQ(out.methodType, got.methodType);
+    EXPECT_EQ(out.protocolType, got.protocolType);
+    EXPECT_EQ(out.endpoint, got.endpoint);
+    EXPECT_EQ(out.queryParameters, got.queryParameters);
+    EXPECT_EQ(out.headers, got.headers);
+}
+
+// g++ -std=c++17 parser_test.cc parser.cc scanner.cc tokens.cpp -o parser_test -lgtest -lgtest_main -pthread
