@@ -43,7 +43,7 @@ class Http : public stream::NetworkStream {
             return -1;
         }
 
-        void handleConnection(tcp::TCPConn& conn) {
+        void handleConnection(tcp::TCPConn conn) {
             std::vector<char> mergedChunks;
             ssize_t totalBytes = 0;
             ssize_t headerEndOffset = -1;

@@ -1,4 +1,6 @@
 
+#include <thread>
+
 #include "http_server.hpp"
 #include "../tcp/tcp.hpp"
 
@@ -11,6 +13,8 @@ void Http::listenAndServe() {
         std::pair<char*, std::pair<ssize_t, int>> conn = stream::NetworkStream::acceptTCP();
         tcp::TCPConn tcpConn(conn.second.second, conn.first, conn.second.first); // pass the socket file descriptor as parameter and also the first bytes readed
 
+        std::thread t(&Http::handleConnection, this, std::move(tcpConn));
+        t.detach();
     }
 }
 
