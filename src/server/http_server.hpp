@@ -145,7 +145,7 @@ class Http : public stream::NetworkStream {
             }
 
             HttpHandler func = routeMap[req.endpoint];
-            Response res;
+            Response res(conn);
 
             func(req, res);
         };
