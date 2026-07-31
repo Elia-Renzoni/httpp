@@ -14,6 +14,7 @@ struct Request {
     int contentLength;
     std::string host;
     int remoteAddress;
+    std::string body;
 };
 
 struct Response {

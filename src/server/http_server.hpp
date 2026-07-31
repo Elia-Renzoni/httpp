@@ -32,47 +32,73 @@ class Http : public stream::NetworkStream {
             return response;
         }
 
+        ssize_t findHeaderEndOffset(const char *data, ssize_t totalBytes) {
+            if (totalBytes >= 4) {
+                std::string_view view(data, totalBytes);
+                size_t position = view.find("\r\n\r\n");
+                if (position != std::string_view::npos) {
+                    return static_cast<ssize_t>(position + 4);
+                }
+            }
+            return -1;
+        }
+
         void handleConnection(tcp::TCPConn& conn) {
             std::vector<char> mergedChunks;
-            // counter for all the bytes readed per buffer
-            ssize_t totalBytes;
+            ssize_t totalBytes = 0;
+            ssize_t headerEndOffset = -1;
 
             std::pair<char*, ssize_t> buffer = conn.readInitialBuffer();
             char *data = buffer.first;
-            totalBytes +=  buffer.second;
-            if (isHeaderReached(data, totalBytes)) {
+            ssize_t bytesRead = buffer.second;
+
+            if (bytesRead > 0) {
+                totalBytes += bytesRead;
+                mergedChunks.insert(mergedChunks.end(), data, data + bytesRead);
+            }
+
+            headerEndOffset = findHeaderEndOffset(mergedChunks.data(), totalBytes);
+            if (headerEndOffset != -1) {
                 goto PARSE;
             }
 
-            if (totalBytes < maxHeaderBytes) {
-                mergedChunks.insert(mergedChunks.end(), data, data + totalBytes);
-            } else {
+            if (totalBytes >= maxHeaderBytes) {
                 std::string response = buildHTTPResponse("431", "Request Header Fields Too Large", "");
                 conn.write(response);
                 conn.closeConn();
+                return;
             }
 
-            tcpContext ctx = tcpContext {
-                .conn = conn,
-                .totalBytesToRead = -1, // -1 = unknown
-            };
-            collectTCPSegments(mergedChunks, ctx);
+            do {
+                buffer = conn.readUntil();
+                data = buffer.first;
+                bytesRead = buffer.second;
 
-            if (!isHeaderReached(mergedChunks.data(), totalBytes)) {
+                if (bytesRead <= 0) break;
+
+                totalBytes += bytesRead;
+                mergedChunks.insert(mergedChunks.end(), data, data + bytesRead);
+
+                headerEndOffset = findHeaderEndOffset(mergedChunks.data(), totalBytes);
+            } while (headerEndOffset == -1 && totalBytes <= maxHeaderBytes);
+
+            if (headerEndOffset == -1) {
                 std::string response = buildHTTPResponse("400", "Bad Request", "");
                 conn.write(response);
                 conn.closeConn();
+                return;
             }
 
             if (totalBytes > maxHeaderBytes) {
                 std::string response = buildHTTPResponse("431", "Request Header Fields Too Large", "");
                 conn.write(response);
                 conn.closeConn();
+                return;
             }
 
-PARSE:
+        PARSE:
             parsing::TokensManager tm = parsing::TokensManager();
-            parsing::Scanner lexer = parsing::Scanner(tm, mergedChunks.data(), totalBytes);
+            parsing::Scanner lexer = parsing::Scanner(tm, mergedChunks.data(), headerEndOffset);
             parsing::Parser parser = parsing::Parser(lexer);
 
             try {
@@ -82,9 +108,9 @@ PARSE:
                 std::string response = buildHTTPResponse("400", "Bad Request", exp.what());
                 conn.write(response);
                 conn.closeConn();
+                return;
             }
 
-            // populate the request struct with the parsed data
             Request req;
             parser.parserStack->walkStack(req);
 
@@ -92,61 +118,43 @@ PARSE:
                 std::string response = buildHTTPResponse("400", "Bad Request", "function handler not found for " + req.endpoint);
                 conn.write(response);
                 conn.closeConn();
+                return;
+            }
+
+            std::vector<char> bodyBuffer;
+
+            if (totalBytes > headerEndOffset) {
+                bodyBuffer.insert(bodyBuffer.end(), mergedChunks.begin() + headerEndOffset, mergedChunks.end());
             }
 
             if (req.contentLength > 0) {
-                ctx.totalBytesToRead = req.contentLength;
-                collectTCPSegments(mergedChunks, ctx);
+                ssize_t remainingBytes = req.contentLength - bodyBuffer.size();
+
+                while (remainingBytes > 0) {
+                    buffer = conn.readUntil();
+                    data = buffer.first;
+                    bytesRead = buffer.second;
+
+                    if (bytesRead <= 0) break;
+
+                    bodyBuffer.insert(bodyBuffer.end(), data, data + bytesRead);
+                    remainingBytes -= bytesRead;
+                }
+
+                req.body = std::string(bodyBuffer.begin(), bodyBuffer.end());
             }
 
             HttpHandler func = routeMap[req.endpoint];
-
             Response res;
 
-            // execute user-provided function handler
             func(req, res);
         };
 
-        void collectTCPSegments(std::vector<char>& chunks, tcpContext ctx) {
-            std::pair<char*, ssize_t> buffer;
-            char *data;
-            ssize_t totalBytes;
-            ssize_t maxBytesToRead;
-
-            if (ctx.totalBytesToRead > 0) {
-                maxBytesToRead = ctx.totalBytesToRead;
-            } else {
-                maxBytesToRead = maxHeaderBytes;
-            }
-
-            do {
-                buffer = ctx.conn.readUntil();
-                data = buffer.first;
-                totalBytes += buffer.second;
-                chunks.insert(chunks.end(), data, data + totalBytes);
-            } while (!isHeaderReached(data, totalBytes) && totalBytes <= maxHeaderBytes);
-        }
-
-        bool isHeaderReached(char *data, ssize_t totalBytes) {
-            if (totalBytes >= 4) {
-                std::string_view view(data, totalBytes);
-                size_t position = view.find("\r\n\r\n");
-                if (position != std::string_view::npos)
-                    return true;
-            }
-
-            return false;
-        };
 
         std::string address;
         int port;
         size_t  maxHeaderBytes; // 16kb as a default value
         std::unordered_map<std::string, HttpHandler> routeMap;
-        
-        struct tcpContext {
-            tcp::TCPConn conn;
-            ssize_t totalBytesToRead;
-        };
 };
 
 }
