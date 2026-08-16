@@ -12,6 +12,5 @@ int main() {
 
     server::Http instance = server::Http(addr, listenPort);
     instance.handleFunc("/proof", handler);
-
     instance.listenAndServe();
 }
