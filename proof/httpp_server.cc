@@ -1,7 +1,7 @@
 
 #include "../src/server/http_server.hpp"
 
-void handler(Request req, Response& res) {
+void handler(server::Request req, server::Response& res) {
     std::string protoVersion = "HTTP 1.1";
     std::string headerKey = "Content-Type"; 
     std::string headerValue = "text/plain";
@@ -29,7 +29,7 @@ void handler(Request req, Response& res) {
     res.close();
 }
 
-void handler2(Request req, Response& res) {
+void handler2(server::Request req, server::Response& res) {
     std::string protoVersion = "HTTP 1.1";
     std::string headerKey = "Content-Type"; 
     std::string headerValue = "text/plain";

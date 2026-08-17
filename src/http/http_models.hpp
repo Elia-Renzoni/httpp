@@ -1,3 +1,4 @@
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -6,7 +7,7 @@
 
 #include "../tcp/tcp.hpp"
 
-namespace {
+namespace server {
 
 struct Request {
     std::string methodType;

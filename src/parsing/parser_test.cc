@@ -96,7 +96,7 @@ TEST(TestParser, TestCompleteHeader) {
 
 TEST(TestParser, TestWalkStack) {
     std::string completeHeader = "GET /api/users?id=42&active=true HTTP/1.1\r\nHost: api.example.com\r\nUser-Agent: Mozilla/5.0\r\nAccept: application/json, text/plain\r\n\r\n";
-    Request out = Request {
+    server::Request out = server::Request {
         .methodType = "GET",
         .protocolType = "HTTP/1.1",
         .endpoint = "/api/users",
@@ -128,7 +128,7 @@ TEST(TestParser, TestWalkStack) {
         FAIL();
     }
 
-    Request got;
+    server::Request got;
     p.parserStack->walkStack(got);
 
     EXPECT_EQ(out.methodType, got.methodType);

@@ -1,10 +1,10 @@
 
+#pragma once
+
 #include <string>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <utility>
-
-#pragma once
 
 namespace stream {
 

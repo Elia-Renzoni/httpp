@@ -1,9 +1,9 @@
 
+#pragma once
+
 #include <vector>
 #include <string_view>
 #include "tokens.hpp"
-
-#pragma once
 
 namespace parsing {
 
