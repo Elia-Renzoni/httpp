@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -6,9 +8,7 @@
 #include <stdexcept>
 
 #include "scanner.hpp"
-#include "../server/models.hpp"
-
-#pragma once
+#include "../http/http_models.hpp"
 
 namespace parsing {
 
@@ -54,7 +54,7 @@ struct PStack {
         watermark += value;
     }
 
-    void walkStack(Request &req) {
+    void walkStack(server::Request &req) {
         if (stack.empty()) return;
 
         for (int i = 0; i < watermark; i++) {

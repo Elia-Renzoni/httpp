@@ -1,15 +1,18 @@
 
+#pragma once
+
 #include <string>
 #include <vector>
 #include <functional>
 #include "../stream/network_stream.hpp"
 #include "../tcp/tcp.hpp"
-#include "../parsing/parser.hpp"
+#include "../http/http_models.hpp"
 #include "../parsing/scanner.hpp"
+#include "../parsing/parser.hpp"
 
 namespace server {
 
-using HttpHandler = std::function<void(Request, Response&)>;
+using HttpHandler = std::function<void(server::Request, server::Response&)>;
 
 class Http : public stream::NetworkStream {
     public:
@@ -111,7 +114,7 @@ class Http : public stream::NetworkStream {
                 return;
             }
 
-            Request req;
+            server::Request req;
             parser.parserStack->walkStack(req);
 
             if (!(routeMap.count(req.endpoint))) {
