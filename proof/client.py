@@ -17,9 +17,12 @@ def test_httpp():
             req_body="Ping",
             req_headers= {
                 "Content-Type": "text/plain",
+                "User-Agent": "test",
+                "Accept-Encoding": "identity",
+                "Accept": "text/plain"
             },
             exp_status=[200, 200, 400],
-            exp_res=["Pong", "Pong", "function handler not found for fake-endpoint"],
+            exp_res=["Pong", "Pong", "function handler not found for /fake-endpoint"],
     )
 
     for test_case in range(3):
@@ -31,8 +34,9 @@ def test_httpp():
 
         response = requests.post(url, data=body, headers=hd)
 
-        assert response.status_code == status_code
-        assert response.text == text
+        print(f"server response ({response.status_code}): {repr(response.text)}")
+        assert response.status_code == status_code, f"exp: {status_code} got {response.status_code}"
+        assert response.text == text, f"exp: {text} got: {response.text} "
 
 if __name__ == "__main__":
     test_httpp()

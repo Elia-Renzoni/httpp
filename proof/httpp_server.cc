@@ -1,60 +1,37 @@
-
 #include "../src/server/http_server.hpp"
 
-void handler(server::Request req, server::Response& res) {
-    std::string protoVersion = "HTTP 1.1";
-    std::string headerKey = "Content-Type"; 
+void processRequest(server::Request req, server::Response& res) {
+    std::string protoVersion = "HTTP/1.1"; 
+    std::string headerKey = "Content-Type";  
     std::string headerValue = "text/plain";
-    std::string badReq = "Bad Request";
-    std::string ok = "Ok";
-    int status400 = 400;
+
     int status200 = 200;
+    std::string okMsg = "OK";
+    int status400 = 400;
+    std::string badReqMsg = "Bad Request";
 
-    if (req.methodType != "POST" && req.body != "Ping") {
-        res.setProtocol(protoVersion);
-        res.setHeaders(headerKey, headerValue);
-        res.writeStatuses(status400, badReq);
-
-        auto response = "Error Message";
-        res.write(response);
-        res.close();
-        return;
-    }
-
-    res.setHeaders(headerKey, headerValue);
     res.setProtocol(protoVersion);
-    res.writeStatuses(status200, ok);
-    auto response = "Pong";
-    res.write(response);
+    res.setHeaders(headerKey, headerValue);
+
+    if (req.methodType != "POST" || req.body != "Ping") {
+        res.writeStatuses(status400, badReqMsg);
+        std::string errResp = "Error Message";
+        res.write(errResp);
+    } else {
+        res.writeStatuses(status200, okMsg);
+        std::string okResp = "Pong";
+        res.write(okResp);
+    }
+    
     res.close();
 }
 
+void handler(server::Request req, server::Response& res) {
+    processRequest(req, res);
+}
+
 void handler2(server::Request req, server::Response& res) {
-    std::string protoVersion = "HTTP 1.1";
-    std::string headerKey = "Content-Type"; 
-    std::string headerValue = "text/plain";
-    std::string badReq = "Bad Request";
-    std::string ok = "Ok";
-    int status400 = 400;
-    int status200 = 200;
-
-    if (req.methodType != "POST" && req.body != "Ping") {
-        res.setProtocol(protoVersion);
-        res.setHeaders(headerKey, headerValue);
-        res.writeStatuses(status400, badReq);
-
-        auto response = "Error Message";
-        res.write(response);
-        res.close();
-        return;
-    }
-
-    res.setHeaders(headerKey, headerValue);
-    res.setProtocol(protoVersion);
-    res.writeStatuses(status200, ok);
-    auto response = "Pong";
-    res.write(response);
-    res.close();
+    processRequest(req, res);
 }
 
 int main() {
