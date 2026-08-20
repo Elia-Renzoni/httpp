@@ -3,17 +3,19 @@
 
 #include "http_server.hpp"
 #include "../tcp/tcp.hpp"
+#include "../logger/logger.hpp"
 
 namespace server {
 
 void Http::listenAndServe() {
     stream::NetworkStream::bindAndlistenTCP();
 
+    LOG_INFO("http server ready to accept connections...");
     for (;;) {
         std::pair<char*, std::pair<ssize_t, int>> conn = stream::NetworkStream::acceptTCP();
-        tcp::TCPConn tcpConn(conn.second.second, conn.first, conn.second.first); // pass the socket file descriptor as parameter and also the first bytes readed
 
-        std::thread t(&Http::handleConnection, this, std::move(tcpConn));
+        LOG_INFO("tcp connection established");
+        std::thread t(&Http::handleConnection, this, tcp::TCPConn(conn.second.second, conn.first, conn.second.first));
         t.detach();
     }
 }

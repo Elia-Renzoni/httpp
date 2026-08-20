@@ -52,8 +52,8 @@ struct Response {
         }
 
         void writeStatuses(int& statusCode, std::string& status) {
-            statusCode = statusCode;
-            status = status;
+            this->statusCode = statusCode;
+            this->status = status;
         }
 
         void setHeaders(std::string& key, std::string& value) {
@@ -61,7 +61,7 @@ struct Response {
         }
 
         void setProtocol(std::string& protocol) {
-            protocolType = protocol;
+            this->protocolType = protocol;
         }
 
         void close() {

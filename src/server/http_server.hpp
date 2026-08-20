@@ -6,6 +6,7 @@
 #include <functional>
 #include "../stream/network_stream.hpp"
 #include "../tcp/tcp.hpp"
+#include "../logger/logger.hpp"
 #include "../http/http_models.hpp"
 #include "../parsing/scanner.hpp"
 #include "../parsing/parser.hpp"
@@ -47,6 +48,7 @@ class Http : public stream::NetworkStream {
         }
 
         void handleConnection(tcp::TCPConn conn) {
+            LOG_INFO("handling underlying TCP connection");
             std::vector<char> mergedChunks;
             ssize_t totalBytes = 0;
             ssize_t headerEndOffset = -1;
@@ -66,6 +68,7 @@ class Http : public stream::NetworkStream {
             }
 
             if (totalBytes >= maxHeaderBytes) {
+                LOG_ERROR("got an HTTP header too large"); 
                 std::string response = buildHTTPResponse("431", "Request Header Fields Too Large", "");
                 conn.write(response);
                 conn.closeConn();
@@ -73,6 +76,7 @@ class Http : public stream::NetworkStream {
             }
 
             do {
+                LOG_INFO("fetching data from the underlying TCP connection");
                 buffer = conn.readUntil();
                 data = buffer.first;
                 bytesRead = buffer.second;
@@ -113,6 +117,7 @@ class Http : public stream::NetworkStream {
                 conn.closeConn();
                 return;
             }
+            LOG_INFO("HTTP header succesfully parsed");
 
             server::Request req;
             parser.parserStack->walkStack(req);

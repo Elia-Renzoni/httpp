@@ -46,21 +46,21 @@ std::pair<char*, std::pair<ssize_t, int>> NetworkStream::acceptTCP() {
     socklen_t len = sizeof(client);
     auto sock = accept(socketFileDescriptor, (struct sockaddr *)&client, &len);
     if (sock < 0) {
-         close(socketFileDescriptor);
          throw NetworkError("accept failed");
     }
     char* recvBuffer = new char[receiveBufferMaxSize];
     ssize_t recvLen = read(sock, recvBuffer, receiveBufferMaxSize);
     if (recvLen == -1) {
-         close(socketFileDescriptor);
+         close(sock);
+         delete[] recvBuffer;
          throw NetworkError("failed to read data");
     }
 
-    if (recvLen < receiveBufferMaxSize) 
+    if (recvLen < static_cast<ssize_t>(receiveBufferMaxSize)) 
         recvBuffer[recvLen] = '\0';
     else
         recvBuffer[receiveBufferMaxSize - 1] = '\0';
-    return {recvBuffer, {recvLen, socketFileDescriptor}};
+    return {recvBuffer, {recvLen, sock}};
 }
 
 }
