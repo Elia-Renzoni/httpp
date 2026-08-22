@@ -29,6 +29,16 @@ enum StatusList {
     StatusGatewayTimeout = 504
 };
 
+inline constexpr std::string_view MethodGet = "GET";
+inline constexpr std::string_view MethodPost = "POST";
+inline constexpr std::string_view MethodPut = "PUT";
+inline constexpr std::string_view MethodPatch = "PATCH";
+inline constexpr std::string_view MethodDelete = "DELETE";
+inline constexpr std::string_view MethodHead = "HEAD";
+inline constexpr std::string_view MethodOptions = "OPTIONS";
+inline constexpr std::string_view MethodConnect = "CONNECT";
+inline constexpr std::string_view MethodTrace = "TRACE";
+
 struct Request {
     std::string methodType;
     std::string protocolType;
