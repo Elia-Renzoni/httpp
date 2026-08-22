@@ -119,7 +119,7 @@ class Http : public stream::NetworkStream {
             }
             LOG_INFO("HTTP header succesfully parsed");
 
-            server::Request req;
+            server::Request req{};
             parser.parserStack->walkStack(req);
 
             if (!(routeMap.count(req.endpoint))) {

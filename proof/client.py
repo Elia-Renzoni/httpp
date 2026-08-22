@@ -5,34 +5,43 @@ import requests
 @dataclass
 class Test:
     req_urls: list[str]
+    method_types: list[str]
     req_body: str
     req_headers: dict[str, str]
     exp_status: list[int]
     exp_res: list[str]
 
-
 def test_httpp():
     test = Test(
-            req_urls=["http://localhost:8080/proof", "http://localhost:8080/proof-again", "http://localhost:8080/fake-endpoint"],
+            req_urls=["http://localhost:8080/proof", "http://localhost:8080/proof-again", "http://localhost:8080/fake-endpoint", "http://localhost:8080/test?id=12&name=foo&post=mock+bar"],
+            method_types=["POST", "POST", "POST", "GET"],
             req_body="Ping",
             req_headers= {
                 "Content-Type": "text/plain",
                 "User-Agent": "test",
                 "Accept-Encoding": "identity",
-                "Accept": "text/plain"
+                "Accept": "text/plain",
+                "Connection": "close"
             },
-            exp_status=[200, 200, 400],
-            exp_res=["Pong", "Pong", "function handler not found for /fake-endpoint"],
+            exp_status=[200, 200, 400, 200],
+            exp_res=["Pong", "Pong", "function handler not found for /fake-endpoint", "Test Passed"],
     )
 
-    for test_case in range(3):
+    for test_case in range(len(test.req_urls)):
         url = test.req_urls[test_case]
         body = test.req_body
         hd = test.req_headers
         status_code = test.exp_status[test_case]
         text = test.exp_res[test_case]
+        method_type = test.method_types[test_case]
 
-        response = requests.post(url, data=body, headers=hd)
+        body = test.req_body if method_type == "POST" else None
+        response = requests.request(
+            method=method_type,
+            url=url,
+            data=body,
+            headers=hd
+        )
 
         print(f"server response ({response.status_code}): {repr(response.text)}")
         assert response.status_code == status_code, f"exp: {status_code} got {response.status_code}"
