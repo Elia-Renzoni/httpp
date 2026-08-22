@@ -3,7 +3,7 @@
 void processRequest(server::Request req, server::Response& res) {
     res.setHeaders("Content-Type", "text/plain");
 
-    if (req.methodType != "POST" || req.body != "Ping") {
+    if (req.methodType != server::MethodPost || req.body != "Ping") {
         res.writeStatus(server::StatusBadRequest);
         std::string errResp = "Error Message";
         res.write(errResp);
@@ -25,7 +25,7 @@ void handler2(server::Request req, server::Response& res) {
 }
 
 void handler3(server::Request req, server::Response& res) {
-    if (req.methodType != "GET") {
+    if (req.methodType != server::MethodGet) {
         res.setHeaders("Content-Type", "text/plain");
         res.writeStatus(server::StatusBadRequest);
         std::string errResp = "Error Message";
