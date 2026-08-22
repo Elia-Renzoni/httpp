@@ -48,6 +48,8 @@ std::pair<char*, std::pair<ssize_t, int>> NetworkStream::acceptTCP() {
     if (sock < 0) {
          throw NetworkError("accept failed");
     }
+
+    setSocketTimeoutOptions(sock);
     char* recvBuffer = new char[receiveBufferMaxSize];
     ssize_t recvLen = read(sock, recvBuffer, receiveBufferMaxSize);
     if (recvLen == -1) {

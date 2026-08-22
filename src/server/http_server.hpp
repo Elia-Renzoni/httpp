@@ -19,7 +19,11 @@ class Http : public stream::NetworkStream {
     public:
         Http(std::string& addr, int port): address(addr), port(port), maxHeaderBytes(16384), stream::NetworkStream(addr, port) {};
         Http(std::string addr, int port, int maxHeaderBytes): address(addr), port(port), maxHeaderBytes(maxHeaderBytes), stream::NetworkStream(addr, port){};
-        Http(std::string addr, int port, int maxHeaderBytes, int customRecvBufferSSize): address(addr), port(port), maxHeaderBytes(maxHeaderBytes), stream::NetworkStream(addr, port){};
+        Http(std::string addr, int port, int maxHeaderBytes, int customRecvBufferSize): address(addr), port(port), maxHeaderBytes(maxHeaderBytes), stream::NetworkStream(addr, port, customRecvBufferSize){};
+        Http(std::string& addr, int port, int readTimeout, int writeTimeout): address(addr), port(port), maxHeaderBytes(16384), stream::NetworkStream(addr, port, readTimeout, writeTimeout) {};
+        Http(std::string addr, int port, int maxHeaderBytes, int readTimeout, int writeTimeout): address(addr), port(port), maxHeaderBytes(maxHeaderBytes), stream::NetworkStream(addr, port, readTimeout, writeTimeout){};
+        Http(std::string addr, int port, int maxHeaderBytes, int customRecvBufferSize, int readTimeout, int writeTimeout): address(addr), port(port), maxHeaderBytes(maxHeaderBytes), stream::NetworkStream(addr, port, customRecvBufferSize, readTimeout, writeTimeout){};
+        
 
         ~Http() = default;
 
