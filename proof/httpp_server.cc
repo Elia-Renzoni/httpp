@@ -1,24 +1,14 @@
 #include "../src/server/http_server.hpp"
 
 void processRequest(server::Request req, server::Response& res) {
-    std::string protoVersion = "HTTP/1.1"; 
-    std::string headerKey = "Content-Type";  
-    std::string headerValue = "text/plain";
-
-    int status200 = 200;
-    std::string okMsg = "OK";
-    int status400 = 400;
-    std::string badReqMsg = "Bad Request";
-
-    res.setProtocol(protoVersion);
-    res.setHeaders(headerKey, headerValue);
+    res.setHeaders("Content-Type", "text/plain");
 
     if (req.methodType != "POST" || req.body != "Ping") {
-        res.writeStatuses(status400, badReqMsg);
+        res.writeStatus(server::StatusBadRequest);
         std::string errResp = "Error Message";
         res.write(errResp);
     } else {
-        res.writeStatuses(status200, okMsg);
+        res.writeStatus(server::StatusOK);
         std::string okResp = "Pong";
         res.write(okResp);
     }
