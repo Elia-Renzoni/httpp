@@ -54,6 +54,9 @@ void handler3(server::Request req, server::Response& res) {
     res.close();
 }
 
+void handler4(server::Request req, server::Response& res) {
+}
+
 int main() {
     std::string addr = "127.0.0.1";
     int listenPort = 8080;
@@ -62,6 +65,7 @@ int main() {
     instance.handleFunc("/proof", handler);
     instance.handleFunc("/proof-again", handler2);
     instance.handleFunc("/test", handler3);
+    instance.handleFunc("/test-timeout", handler4);
 
     instance.listenAndServe();
 }

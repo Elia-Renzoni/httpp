@@ -11,7 +11,21 @@ class Test:
     exp_status: list[int]
     exp_res: list[str]
 
-def test_httpp():
+def test_timeout():
+    test = Test(
+            req_urls=["http://localhost:8080/test-timeout"],
+            method_types=["PUT"],
+            req_body="",
+            req_headers={
+                "User-Agent": "test",
+                "Accept-Encoding": "identity",
+                "Accept": "text/plain",
+            },
+            exp_status=[408],
+            exp_res=[],
+    )
+
+def test_http_roundtrips():
     test = Test(
             req_urls=["http://localhost:8080/proof", "http://localhost:8080/proof-again", "http://localhost:8080/fake-endpoint", "http://localhost:8080/test?id=12&name=foo&post=mock+bar"],
             method_types=["POST", "POST", "POST", "GET"],
@@ -48,4 +62,5 @@ def test_httpp():
         assert response.text == text, f"exp: {text} got: {response.text} "
 
 if __name__ == "__main__":
-    test_httpp()
+    test_http_roundtrips()
+    test_timeout()

@@ -18,6 +18,8 @@ std::pair<char*, ssize_t> TCPConn::readUntil() {
     ssize_t len = read(socketFileDescriptor, chunk, 2048);
     if (len < 0) {
             close(socketFileDescriptor);
+            if (errno == EAGAIN || errno == EWOULDBLOCK) 
+                throw std::runtime_error("timeout occured while reading data");
             throw std::runtime_error("something went wrong while reading data from TCP");
     }
 
@@ -35,6 +37,8 @@ void TCPConn::write(const std::string& data) {
     auto result = send(socketFileDescriptor, dataToSend, totalSize, 0);
     if (result <= 0) {
         LOG_ERROR("TCP failure occured while sending data to the client");
+        if (errno == EAGAIN || errno == EWOULDBLOCK) 
+            throw std::runtime_error("timeout occured while writing data");
         close(socketFileDescriptor);
     }
 };

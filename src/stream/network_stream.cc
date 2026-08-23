@@ -7,7 +7,7 @@
 
 namespace stream { 
 
-NetworkStream::NetworkStream(std::string& addr, int& port, int& customRecvBufferSize): listenerAddress(addr), listenerPort(port) {
+NetworkStream::NetworkStream(std::string& addr, int& port, int& customRecvBufferSize, int& readTimeout, int& writeTimeout): listenerAddress(addr), listenerPort(port), readTimeout(readTimeout), writeTimeout(writeTimeout) {
     if (customRecvBufferSize == 0 || customRecvBufferSize < 0)
         throw std::runtime_error("invalid receive buffer size");
     this->receiveBufferMaxSize = customRecvBufferSize;
@@ -52,10 +52,13 @@ std::pair<char*, std::pair<ssize_t, int>> NetworkStream::acceptTCP() {
     setSocketTimeoutOptions(sock);
     char* recvBuffer = new char[receiveBufferMaxSize];
     ssize_t recvLen = read(sock, recvBuffer, receiveBufferMaxSize);
-    if (recvLen == -1) {
-         close(sock);
+    if (recvLen < 0) {
          delete[] recvBuffer;
-         throw NetworkError("failed to read data");
+         close(sock);
+         if (errno == EAGAIN || errno == EWOULDBLOCK) 
+             throw NetworkError("timeout occured while reading data");
+         else
+            throw NetworkError("failed to read data");
     }
 
     if (recvLen < static_cast<ssize_t>(receiveBufferMaxSize)) 
